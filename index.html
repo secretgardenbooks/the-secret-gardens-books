@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Secret Gardens Books — Catálogo</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+<style>
+  :root {
+    --navy: #0d1b3e; --deep: #111c3a; --purple: #7b5ea7;
+    --lavender: #a98fd0; --lilac: #c9b8e8; --moonlight: #e8e2f5;
+    --star: #f5f0ff; --gold: #d4b896; --text: #e2ddf0; --muted: #9990b8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--navy); color: var(--text); font-family: 'Jost', sans-serif; min-height: 100vh; overflow-x: hidden; position: relative; }
+
+  .stars-container { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(circle at center, #111c3a 0%, #0d1b3e 100%); }
+  .star { position: absolute; background: white; border-radius: 50%; opacity: 0.5; animation: twinkle var(--duration) infinite ease-in-out; }
+  @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
+
+  header { position: relative; text-align: center; padding: 2.5rem 1rem; border-bottom: 1px solid rgba(169,143,208,.2); z-index: 1; }
+  .logo-img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 30px rgba(123,94,167,0.4); border: 2px solid rgba(169,143,208,0.3); }
+  .logo-text h1 { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: var(--moonlight); text-shadow: 0 0 20px rgba(169,143,208,0.5); margin-top: 10px; }
+  .welcome-text { max-width: 500px; margin: 1.5rem auto 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.1rem; color: var(--lavender); line-height: 1.4; padding: 0 1rem; }
+  .info-details { max-width: 500px; margin: 1.2rem auto 0; font-size: 0.85rem; color: var(--lavender); line-height: 1.6; padding: 0 1.5rem; }
+  .info-details p { margin-bottom: 10px; }
+  .info-highlight { color: var(--moonlight); font-weight: 400; }
+
+  .controls { position: sticky; top: 0; z-index: 100; background: rgba(13,27,62,0.95); backdrop-filter: blur(10px); padding: 0.8rem 1rem; border-bottom: 1px solid rgba(169,143,208,0.15); display: flex; gap: 10px; flex-wrap: wrap; }
+  .search-box { flex: 1; min-width: 150px; background: rgba(255,255,255,0.05); border: 1px solid rgba(169,143,208,0.25); border-radius: 999px; padding: 0.5rem 1.2rem; }
+  .search-box input { background: transparent; border: none; outline: none; color: var(--text); width: 100%; font-size: 0.9rem; }
+  .genre-filter { background: rgba(255,255,255,0.05); border: 1px solid rgba(169,143,208,0.25); border-radius: 999px; padding: 0.5rem 1rem; color: var(--text); font-size: 0.85rem; outline: none; cursor: pointer; }
+  .genre-filter option { background: var(--deep); color: var(--text); }
+  /* Botón flotante carrito */
+  .cart-fab { position: fixed; bottom: 28px; right: 20px; z-index: 500; background: var(--purple); border: none; border-radius: 50%; width: 58px; height: 58px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 20px rgba(123,94,167,0.5), 0 0 0 1px rgba(169,143,208,0.2); transition: transform 0.2s, box-shadow 0.2s, opacity 0.25s; }
+  .cart-fab:active { transform: scale(0.93); }
+  .cart-fab:hover { box-shadow: 0 6px 28px rgba(123,94,167,0.7), 0 0 0 1px rgba(169,143,208,0.3); }
+  #cartBadge { position: absolute; top: -4px; right: -4px; background: var(--gold); color: #111; border-radius: 999px; min-width: 20px; height: 20px; padding: 0 5px; font-weight: 700; font-size: 0.72rem; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+  #cartBadge.bump { transform: scale(1.4); }
+
+  main { position: relative; z-index: 1; padding: 1.5rem 0.8rem; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(169,143,208,0.12); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: 0.3s; }
+  .card:active { transform: scale(0.98); }
+  .card-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: rgba(123,94,167,0.1); border-bottom: 1px solid rgba(169,143,208,0.1); }
+  .card-body { padding: 0.8rem; flex: 1; display: flex; flex-direction: column; }
+  .card-title { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: var(--moonlight); line-height: 1.2; height: 2.4em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .card-price { color: var(--gold); font-weight: 600; font-size: 1.1rem; margin: 8px 0; }
+  .card-genres { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 8px; }
+  .genre-tag { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.04em; background: rgba(123,94,167,0.2); border: 1px solid rgba(169,143,208,0.25); color: var(--lavender); border-radius: 999px; padding: 2px 7px; }
+  .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: auto; }
+  .btn { border: none; padding: 10px 4px; border-radius: 6px; font-size: 0.65rem; text-transform: uppercase; cursor: pointer; color: white; font-weight: 600; transition: opacity 0.2s; }
+  .btn:active { opacity: 0.7; }
+  .btn-buy { background: #25D366; }
+  .btn-cart { background: var(--purple); }
+
+  .modal { position: fixed; inset: 0; background: rgba(5,10,25,0.95); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px); }
+  .modal-content { background: var(--deep); border: 1px solid var(--purple); border-radius: 15px; width: 100%; max-width: 400px; padding: 20px; position: relative; animation: pop 0.3s ease; max-height: 90vh; overflow-y: auto; }
+  @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-close { position: absolute; top: 10px; right: 15px; font-size: 1.8rem; color: var(--muted); cursor: pointer; line-height: 1; z-index: 1; }
+  .modal-img { width: 100%; border-radius: 10px; margin-bottom: 15px; border: 1px solid rgba(169,143,208,0.2); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+  .modal-genres { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+  .modal-genre-tag { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em; background: rgba(123,94,167,0.25); border: 1px solid rgba(169,143,208,0.3); color: var(--lavender); border-radius: 999px; padding: 3px 10px; }
+  .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+  .modal-btn { border: none; padding: 12px; border-radius: 8px; font-size: 0.75rem; text-transform: uppercase; cursor: pointer; color: white; font-weight: 700; transition: opacity 0.2s; }
+  .modal-btn:active { opacity: 0.7; }
+  .modal-btn-buy { background: #25D366; }
+  .modal-btn-cart { background: var(--purple); }
+
+  .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--purple); color: white; padding: 10px 22px; border-radius: 999px; font-size: 0.85rem; font-weight: 500; z-index: 9999; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .sidebar { position: fixed; top: 0; right: -100%; width: 90%; max-width: 360px; height: 100%; background: var(--deep); z-index: 2000; transition: 0.4s; padding: 25px; box-shadow: -10px 0 40px rgba(0,0,0,0.7); display: flex; flex-direction: column; border-left: 1px solid var(--purple); }
+  .sidebar.open { right: 0; }
+  .cart-list { flex: 1; overflow-y: auto; margin: 20px 0; padding-right: 5px; }
+  .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; }
+  .cart-item-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.2rem; padding: 0 5px; transition: color 0.2s; }
+  .cart-item-remove:hover { color: #ff6b6b; }
+  .cart-empty { text-align: center; color: var(--muted); font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.1rem; padding: 40px 0; }
+  .checkout-btn { background: #25D366; color: white; border: none; width: 100%; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.9rem; transition: opacity 0.2s; }
+  .checkout-btn:active { opacity: 0.8; }
+
+  #loading { text-align: center; padding: 60px; color: var(--lavender); font-size: 1.2rem; }
+  .no-results { text-align: center; color: var(--muted); font-style: italic; padding: 40px; grid-column: span 2; }
+</style>
+</head>
+<body>
+
+<div class="stars-container" id="stars"></div>
+
+<header>
+  <div class="logo-wrap">
+    <img src="https://drive.google.com/thumbnail?id=11AFSWDWBU8cKap0G_AVcGjF5ITofF025&sz=w200" class="logo-img" alt="The Secret Gardens Logo" onerror="this.style.display='none'">
+    <div class="logo-text">
+      <h1>The Secret Gardens</h1>
+      <span style="letter-spacing:.35em; text-transform:uppercase; color:var(--lavender); font-size:.7rem;">Books · Catálogo Digital</span>
+    </div>
+  </div>
+  <p class="welcome-text">"Un jardín secreto, donde cada libro es una puerta hacia mundos que esperan ser descubiertos, bajo la luz de la luna."</p>
+  <div class="info-details">
+    <p class="info-highlight">Trabajamos con libros originales y nuevos bajo pedido. ✨📚</p>
+    <p>Los pagos se realizan en 2 cuotas:<br>
+    • La primera al momento de hacer el pedido.<br>
+    • La segunda al momento de la entrega, o —si eres de otra ciudad— al momento de realizar el envío.</p>
+    <p>Métodos de pago disponibles:<br>
+    <span class="info-highlight">Binance, Zelle, Zinli y efectivo. 💳</span></p>
+    <p style="font-style:italic; margin-top:15px;">Gracias por confiar en nosotros. ❤️</p>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Buscar por título o autor...">
+  </div>
+  <select id="genreFilter" class="genre-filter" onchange="applyFilters()">
+    <option value="">Todos los géneros</option>
+  </select>
+</div>
+
+<main>
+  <div id="loading">✨ Desplegando el jardín...</div>
+  <div class="grid" id="productGrid"></div>
+</main>
+
+<div id="modal" class="modal" onclick="closeModal()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <span class="modal-close" onclick="closeModal()">×</span>
+    <img id="modalImg" src="" class="modal-img" onerror="this.src='https://placehold.co/300x400/111c3a/a98fd0?text=The+Secret+Gardens'">
+    <h2 id="modalTitle" style="font-family:'Cormorant Garamond',serif; color:var(--moonlight); font-size:1.6rem; margin-bottom:5px;"></h2>
+    <p id="modalAuthor" style="color:var(--lavender); font-style:italic; font-size:0.95rem; margin-bottom:10px;"></p>
+    <div id="modalGenres" class="modal-genres"></div>
+    <p id="modalDesc" style="font-size:0.9rem; line-height:1.6; color:var(--text); max-height:130px; overflow-y:auto;"></p>
+    <div id="modalPrice" style="color:var(--gold); font-weight:bold; font-size:1.5rem; margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;"></div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-buy" onclick="buyNowModal()">🛍 Comprar ahora</button>
+      <button class="modal-btn modal-btn-cart" onclick="addToCartModal()">🛒 Añadir al carrito</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<div id="emptyCartModal" class="modal" onclick="closeEmptyCart()">
+  <div class="modal-content" style="text-align:center; padding:30px 20px;" onclick="event.stopPropagation()">
+    <div style="font-size:3rem; margin-bottom:10px;">🌙</div>
+    <h3 style="font-family:'Cormorant Garamond',serif; color:var(--moonlight); font-size:1.5rem; margin-bottom:10px;">Tu carrito está vacío</h3>
+    <p style="color:var(--lavender); font-style:italic; margin-bottom:20px;">Agrega algunos libros a tu pedido para continuar.</p>
+    <button onclick="closeEmptyCart()" class="modal-btn modal-btn-cart" style="width:100%; font-size:0.9rem; padding:12px;">Seguir explorando</button>
+  </div>
+</div>
+
+<div id="sidebar" class="sidebar">
+  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--purple); padding-bottom:15px;">
+    <h2 style="font-family:'Cormorant Garamond',serif; color:var(--moonlight); font-size:1.8rem;">Tu Pedido</h2>
+    <span onclick="toggleCart()" style="cursor:pointer; font-size:2.2rem; color:var(--muted);">×</span>
+  </div>
+  <div id="cartList" class="cart-list"></div>
+  <div id="cartTotal" style="font-weight:bold; margin-bottom:25px; color:var(--gold); font-size:1.4rem; text-align:right;"></div>
+  <button class="checkout-btn" onclick="sendOrder()">Finalizar Pedido 🌙</button>
+</div>
+
+<script>
+var URL_CSV = "https://docs.google.com/spreadsheets/d/1XyYs7UJAhu8nKhhlHWCrxFbP4TU5GaXKA2K5fQhneVU/export?format=csv&gid=0";
+var WHATSAPP = "584125713381";
+var products = [];
+var cart = [];
+var currentModalId = null;
+
+function createStars() {
+  var container = document.getElementById('stars');
+  for (var i = 0; i < 85; i++) {
+    var star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = (Math.random() * 100) + '%';
+    star.style.top = (Math.random() * 100) + '%';
+    var size = Math.random() * 2.2 + 0.8;
+    star.style.width = size + 'px';
+    star.style.height = size + 'px';
+    star.style.setProperty('--duration', (Math.random() * 3 + 1.5) + 's');
+    container.appendChild(star);
+  }
+}
+createStars();
+
+function getStableImageUrl(rawImg) {
+  if (!rawImg) return '';
+  if (rawImg.indexOf('drive.google.com') !== -1) {
+    var matchD = rawImg.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    var matchId = rawImg.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    var driveId = (matchD && matchD[1]) || (matchId && matchId[1]);
+    if (driveId) return 'https://drive.google.com/thumbnail?id=' + driveId + '&sz=w400';
+  }
+  return rawImg;
+}
+
+async function loadData() {
+  try {
+    var response = await fetch(URL_CSV);
+    var data = await response.text();
+    Papa.parse(data, {
+      header: false,
+      skipEmptyLines: true,
+      complete: function(results) {
+        var rows = results.data.slice(1);
+        products = rows.map(function(cols, index) {
+          var rawPrice = cols[4] ? String(cols[4]).replace(/[^0-9.-]+/g, '') : '0';
+          var rawImg = cols[6] ? cols[6].trim() : '';
+          // Separar géneros por coma, limpiar espacios, eliminar vacíos
+          var genres = cols[3]
+            ? cols[3].split(',').map(function(g) { return g.trim(); }).filter(function(g) { return g.length > 0; })
+            : ['General'];
+          return {
+            id: index,
+            title: cols[1] || 'Sin título',
+            author: cols[2] || 'Anónimo',
+            genres: genres,
+            price: parseFloat(rawPrice) || 0,
+            desc: cols[5] || 'Este libro guarda secretos que solo descubrirás al leerlo...',
+            img: getStableImageUrl(rawImg)
+          };
+        }).filter(function(p) { return p.title !== 'Sin título'; });
+
+        populateGenres();
+        document.getElementById('loading').style.display = 'none';
+        renderGrid(products);
+      }
+    });
+  } catch(e) {
+    document.getElementById('loading').innerText = 'Hubo un error al cargar el jardín.';
+    console.error(e);
+  }
+}
+
+function populateGenres() {
+  var seen = {};
+  var unique = [];
+  products.forEach(function(p) {
+    p.genres.forEach(function(g) {
+      if (!seen[g]) { seen[g] = true; unique.push(g); }
+    });
+  });
+  unique.sort();
+  var select = document.getElementById('genreFilter');
+  unique.forEach(function(g) {
+    var opt = document.createElement('option');
+    opt.value = g;
+    opt.textContent = g;
+    select.appendChild(opt);
+  });
+}
+
+function applyFilters() {
+  var term = document.getElementById('searchInput').value.toLowerCase();
+  var genre = document.getElementById('genreFilter').value;
+  var filtered = products.filter(function(p) {
+    var matchText = !term ||
+      p.title.toLowerCase().indexOf(term) !== -1 ||
+      p.author.toLowerCase().indexOf(term) !== -1;
+    // Un libro aparece si CUALQUIERA de sus géneros coincide
+    var matchGenre = !genre || p.genres.indexOf(genre) !== -1;
+    return matchText && matchGenre;
+  });
+  renderGrid(filtered);
+}
+
+function renderGrid(lista) {
+  var grid = document.getElementById('productGrid');
+  if (lista.length === 0) {
+    grid.innerHTML = '<div class="no-results">✨ No se encontraron libros con ese criterio.</div>';
+    return;
+  }
+  grid.innerHTML = lista.map(function(p) {
+    var tagsHtml = p.genres.map(function(g) {
+      return '<span class="genre-tag">' + g + '</span>';
+    }).join('');
+    return '<div class="card" onclick="openModal(' + p.id + ')">' +
+      '<img src="' + p.img + '" class="card-img" onerror="this.src=\'https://placehold.co/300x400/111c3a/a98fd0?text=The+Secret+Gardens\'">' +
+      '<div class="card-body">' +
+        '<div class="card-title">' + p.title + '</div>' +
+        '<div class="card-genres">' + tagsHtml + '</div>' +
+        '<div class="card-price">$' + p.price.toFixed(2) + '</div>' +
+        '<div class="btn-group">' +
+          '<button class="btn btn-buy" onclick="event.stopPropagation();buyNow(' + p.id + ')">Comprar</button>' +
+          '<button class="btn btn-cart" onclick="event.stopPropagation();addToCart(' + p.id + ')">Carrito</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function openModal(id) {
+  var p = products.find(function(x) { return x.id === id; });
+  currentModalId = id;
+  document.getElementById('modalImg').src = p.img;
+  document.getElementById('modalTitle').innerText = p.title;
+  document.getElementById('modalAuthor').innerText = p.author;
+  document.getElementById('modalGenres').innerHTML = p.genres.map(function(g) {
+    return '<span class="modal-genre-tag">' + g + '</span>';
+  }).join('');
+  document.getElementById('modalDesc').innerText = p.desc;
+  document.getElementById('modalPrice').innerText = '$' + p.price.toFixed(2);
+  document.getElementById('modal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  document.querySelector('.cart-fab').style.opacity = '0';
+  document.querySelector('.cart-fab').style.pointerEvents = 'none';
+}
+
+function closeModal() {
+  document.getElementById('modal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+  currentModalId = null;
+  document.querySelector('.cart-fab').style.opacity = '1';
+  document.querySelector('.cart-fab').style.pointerEvents = 'auto';
+}
+
+function buyNowModal() {
+  if (currentModalId !== null) { closeModal(); buyNow(currentModalId); }
+}
+function addToCartModal() {
+  if (currentModalId !== null) { addToCart(currentModalId); closeModal(); }
+}
+
+function addToCart(id) {
+  var p = products.find(function(x) { return x.id === id; });
+  var exists = cart.find(function(x) { return x.id === id; });
+  if (exists) { exists.qty++; } else { cart.push(Object.assign({}, p, { qty: 1 })); }
+  updateUI();
+  showToast('📚 "' + p.title + '" añadido al carrito');
+}
+
+function showToast(msg) {
+  var toast = document.getElementById('toast');
+  toast.innerText = msg;
+  toast.classList.add('show');
+  setTimeout(function() { toast.classList.remove('show'); }, 2500);
+}
+
+function updateUI() {
+  var total = cart.reduce(function(acc, item) { return acc + item.qty; }, 0);
+  var badge = document.getElementById('cartBadge');
+  badge.innerText = total;
+  badge.classList.remove('bump');
+  void badge.offsetWidth;
+  badge.classList.add('bump');
+  setTimeout(function() { badge.classList.remove('bump'); }, 200);
+  var cartList = document.getElementById('cartList');
+  if (cart.length === 0) {
+    cartList.innerHTML = '<div class="cart-empty">🌙 Tu carrito está vacío</div>';
+    document.getElementById('cartTotal').innerText = '';
+    return;
+  }
+  var totalMoney = 0;
+  cartList.innerHTML = cart.map(function(item, i) {
+    totalMoney += item.price * item.qty;
+    return '<div class="cart-item">' +
+      '<div style="flex:1;">' +
+        '<div style="font-size:0.9rem;color:var(--moonlight);font-weight:500;">' + item.title + '</div>' +
+        '<div style="font-size:0.75rem;color:var(--muted);">Cant: ' + item.qty + '</div>' +
+      '</div>' +
+      '<div style="font-weight:bold;color:var(--gold);margin-right:10px;">$' + (item.price * item.qty).toFixed(2) + '</div>' +
+      '<button class="cart-item-remove" onclick="removeFromCart(' + i + ')" title="Eliminar">✕</button>' +
+    '</div>';
+  }).join('');
+  document.getElementById('cartTotal').innerText = 'Total: $' + totalMoney.toFixed(2);
+}
+
+function removeFromCart(index) {
+  cart.splice(index, 1);
+  updateUI();
+}
+
+function toggleCart() { document.getElementById('sidebar').classList.toggle('open'); }
+
+function buyNow(id) {
+  var p = products.find(function(x) { return x.id === id; });
+  var msg = encodeURIComponent('🌙 *The Secret Gardens Books*\n\n*Pedido:*\n• ' + p.title + ' — ' + p.author + ' (x1) — $' + p.price.toFixed(2) + '\n\n*Total: $' + p.price.toFixed(2) + '*\n\n_(Enviado desde el catálogo)_');
+  window.open('https://wa.me/' + WHATSAPP + '?text=' + msg);
+}
+
+function sendOrder() {
+  if (cart.length === 0) {
+    document.getElementById('emptyCartModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    return;
+  }
+  var itemsStr = cart.map(function(p) {
+    return '• ' + p.title + ' — ' + p.author + ' (x' + p.qty + ') — $' + (p.price * p.qty).toFixed(2);
+  }).join('\n');
+  var total = cart.reduce(function(acc, p) { return acc + (p.price * p.qty); }, 0);
+  var msg = encodeURIComponent('🌙 *The Secret Gardens Books*\n\n*Pedido:*\n' + itemsStr + '\n\n*Total: $' + total.toFixed(2) + '*\n\n_(Enviado desde el catálogo)_');
+  window.open('https://wa.me/' + WHATSAPP + '?text=' + msg);
+}
+
+function closeEmptyCart() {
+  document.getElementById('emptyCartModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+loadData();
+updateUI();
+</script>
+
+<!-- Botón flotante carrito -->
+<button class="cart-fab" onclick="toggleCart()" aria-label="Abrir carrito">
+  🛒
+  <span id="cartBadge">0</span>
+</button>
+</body>
+</html>

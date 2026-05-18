@@ -151,12 +151,11 @@
     <img src="https://drive.google.com/thumbnail?id=11AFSWDWBU8cKap0G_AVcGjF5ITofF025&sz=w200" class="logo-img" alt="The Secret Gardens Logo" onerror="this.style.display='none'">
     <div class="logo-text">
       <h1>The Secret Gardens</h1>
-      <span style="letter-spacing:.35em; text-transform:uppercase; color:var(--lavender); font-size:.7rem;">Books · Catálogo Digital</span>
+      
     </div>
   </div>
-  <p class="welcome-text">"Un jardín secreto, donde cada libro es una puerta hacia mundos que esperan ser descubiertos, bajo la luz de la luna."</p>
+  <p class="welcome-text">Donde incluso los libros raros echan raíz. 📚</p>
   <div class="info-details">
-    <p class="info-highlight">Trabajamos con libros originales y nuevos bajo pedido. ✨📚</p>
     <p>Métodos de pago disponibles:<br>
     <span class="info-highlight">Binance, Zelle, Zinli y efectivo. 💳</span></p>
     <p style="font-style:italic; margin-top:10px;">Gracias por confiar en nosotros. ❤️</p>
@@ -252,7 +251,10 @@ var URL_CSV = "https://docs.google.com/spreadsheets/d/1XyYs7UJAhu8nKhhlHWCrxFbP4
 var WHATSAPP = "584125713381";
 var CART_GOAL = 5; // libros para llenar la barra de progreso
 var products = [];
-var cart = [];
+var cart = (function() {
+  try { return JSON.parse(localStorage.getItem('sgb_cart')) || []; }
+  catch(e) { return []; }
+})();
 var currentModalId = null;
 
 /* ── Estrellas ── */
@@ -537,7 +539,13 @@ function showToast(msg) {
   setTimeout(function() { toast.classList.remove('show'); }, 2500);
 }
 
+function saveCart() {
+  try { localStorage.setItem('sgb_cart', JSON.stringify(cart)); }
+  catch(e) {}
+}
+
 function updateUI() {
+  saveCart();
   // Badge con animación bump
   var totalItems = cart.reduce(function(acc, item) { return acc + item.qty; }, 0);
   var badge = document.getElementById('cartBadge');

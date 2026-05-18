@@ -16,10 +16,12 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--navy); color: var(--text); font-family: 'Jost', sans-serif; min-height: 100vh; overflow-x: hidden; position: relative; }
 
+  /* ── Estrellas ── */
   .stars-container { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(circle at center, #111c3a 0%, #0d1b3e 100%); }
   .star { position: absolute; background: white; border-radius: 50%; opacity: 0.5; animation: twinkle var(--duration) infinite ease-in-out; }
   @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
 
+  /* ── Header ── */
   header { position: relative; text-align: center; padding: 2.5rem 1rem; border-bottom: 1px solid rgba(169,143,208,.2); z-index: 1; }
   .logo-img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 30px rgba(123,94,167,0.4); border: 2px solid rgba(169,143,208,0.3); }
   .logo-text h1 { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: var(--moonlight); text-shadow: 0 0 20px rgba(169,143,208,0.5); margin-top: 10px; }
@@ -28,23 +30,38 @@
   .info-details p { margin-bottom: 10px; }
   .info-highlight { color: var(--moonlight); font-weight: 400; }
 
+  /* ── Controles ── */
   .controls { position: sticky; top: 0; z-index: 100; background: rgba(13,27,62,0.95); backdrop-filter: blur(10px); padding: 0.8rem 1rem; border-bottom: 1px solid rgba(169,143,208,0.15); display: flex; gap: 10px; flex-wrap: wrap; }
   .search-box { flex: 1; min-width: 150px; background: rgba(255,255,255,0.05); border: 1px solid rgba(169,143,208,0.25); border-radius: 999px; padding: 0.5rem 1.2rem; }
   .search-box input { background: transparent; border: none; outline: none; color: var(--text); width: 100%; font-size: 0.9rem; }
-  .genre-filter { background: rgba(255,255,255,0.05); border: 1px solid rgba(169,143,208,0.25); border-radius: 999px; padding: 0.5rem 1rem; color: var(--text); font-size: 0.85rem; outline: none; cursor: pointer; }
-  .genre-filter option { background: var(--deep); color: var(--text); }
-  /* Botón flotante carrito */
-  .cart-fab { position: fixed; bottom: 28px; right: 20px; z-index: 500; background: var(--purple); border: none; border-radius: 50%; width: 58px; height: 58px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 20px rgba(123,94,167,0.5), 0 0 0 1px rgba(169,143,208,0.2); transition: transform 0.2s, box-shadow 0.2s, opacity 0.25s; }
-  .cart-fab:active { transform: scale(0.93); }
-  .cart-fab:hover { box-shadow: 0 6px 28px rgba(123,94,167,0.7), 0 0 0 1px rgba(169,143,208,0.3); }
-  #cartBadge { position: absolute; top: -4px; right: -4px; background: var(--gold); color: #111; border-radius: 999px; min-width: 20px; height: 20px; padding: 0 5px; font-weight: 700; font-size: 0.72rem; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
-  #cartBadge.bump { transform: scale(1.4); }
+  .search-box input::placeholder { color: var(--muted); }
+  .genre-filter, .sort-select { background: rgba(255,255,255,0.05); border: 1px solid rgba(169,143,208,0.25); border-radius: 999px; padding: 0.5rem 1rem; color: var(--text); font-size: 0.82rem; outline: none; cursor: pointer; }
+  .genre-filter option, .sort-select option { background: var(--deep); color: var(--text); }
 
-  main { position: relative; z-index: 1; padding: 1.5rem 0.8rem; }
+  /* ── Contador de resultados ── */
+  .results-bar { position: relative; z-index: 1; padding: 0.5rem 1.2rem 0; }
+  .results-count { font-size: 0.75rem; color: var(--muted); font-style: italic; }
+
+  /* ── Grid ── */
+  main { position: relative; z-index: 1; padding: 0.8rem 0.8rem 6rem; }
   .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(169,143,208,0.12); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: 0.3s; }
+
+  /* ── Skeleton loader ── */
+  .skeleton-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(169,143,208,0.08); border-radius: 10px; overflow: hidden; }
+  .skeleton-img { width: 100%; aspect-ratio: 3/4; background: linear-gradient(90deg, rgba(169,143,208,0.05) 25%, rgba(169,143,208,0.12) 50%, rgba(169,143,208,0.05) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+  .skeleton-body { padding: 0.8rem; }
+  .skeleton-line { height: 12px; border-radius: 6px; background: linear-gradient(90deg, rgba(169,143,208,0.05) 25%, rgba(169,143,208,0.12) 50%, rgba(169,143,208,0.05) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; margin-bottom: 8px; }
+  .skeleton-line.short { width: 55%; }
+  .skeleton-line.price { width: 40%; height: 16px; margin-top: 6px; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  /* ── Cards ── */
+  .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(169,143,208,0.12); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: border-color 0.3s, transform 0.2s; }
   .card:active { transform: scale(0.98); }
-  .card-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: rgba(123,94,167,0.1); border-bottom: 1px solid rgba(169,143,208,0.1); }
+  .card:hover { border-color: rgba(169,143,208,0.3); }
+  /* lazy load: imagen oculta hasta cargar */
+  .card-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: rgba(123,94,167,0.08); border-bottom: 1px solid rgba(169,143,208,0.1); opacity: 0; transition: opacity 0.4s ease; }
+  .card-img.loaded { opacity: 1; }
   .card-body { padding: 0.8rem; flex: 1; display: flex; flex-direction: column; }
   .card-title { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: var(--moonlight); line-height: 1.2; height: 2.4em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
   .card-price { color: var(--gold); font-weight: 600; font-size: 1.1rem; margin: 8px 0; }
@@ -56,33 +73,72 @@
   .btn-buy { background: #25D366; }
   .btn-cart { background: var(--purple); }
 
+  /* ── Badge sin stock ── */
+  .badge-agotado { position: absolute; top: 8px; left: 8px; background: rgba(180,60,60,0.85); color: white; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 999px; backdrop-filter: blur(4px); }
+  .card-wrap { position: relative; }
+  .card.out-of-stock .btn-buy,
+  .card.out-of-stock .btn-cart { opacity: 0.35; pointer-events: none; cursor: not-allowed; }
+  .card.out-of-stock .card-img { filter: grayscale(40%); }
+
+  /* ── Modal ── */
   .modal { position: fixed; inset: 0; background: rgba(5,10,25,0.95); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px); }
   .modal-content { background: var(--deep); border: 1px solid var(--purple); border-radius: 15px; width: 100%; max-width: 320px; padding: 15px; position: relative; animation: pop 0.3s ease; max-height: 82vh; overflow-y: auto; }
   @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   .modal-close { position: absolute; top: 10px; right: 15px; font-size: 1.8rem; color: var(--muted); cursor: pointer; line-height: 1; z-index: 1; }
   .modal-img { width: 100%; border-radius: 10px; margin-bottom: 10px; border: 1px solid rgba(169,143,208,0.2); box-shadow: 0 6px 14px rgba(0,0,0,0.5); max-height: 220px; object-fit: cover; }
-  .modal-genres { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+  .modal-genres { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
   .modal-genre-tag { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em; background: rgba(123,94,167,0.25); border: 1px solid rgba(169,143,208,0.3); color: var(--lavender); border-radius: 999px; padding: 3px 10px; }
   .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
   .modal-btn { border: none; padding: 9px; border-radius: 8px; font-size: 0.75rem; text-transform: uppercase; cursor: pointer; color: white; font-weight: 700; transition: opacity 0.2s; }
   .modal-btn:active { opacity: 0.7; }
   .modal-btn-buy { background: #25D366; }
   .modal-btn-cart { background: var(--purple); }
+  /* Compartir libro */
+  .modal-share { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 8px; background: none; border: 1px solid rgba(169,143,208,0.2); border-radius: 8px; padding: 7px; width: 100%; color: var(--muted); font-size: 0.72rem; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
+  .modal-share:hover { color: var(--lavender); border-color: rgba(169,143,208,0.4); }
 
-  .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--purple); color: white; padding: 10px 22px; border-radius: 999px; font-size: 0.85rem; font-weight: 500; z-index: 9999; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; white-space: nowrap; }
+  /* ── Toast ── */
+  .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--purple); color: white; padding: 10px 22px; border-radius: 999px; font-size: 0.85rem; font-weight: 500; z-index: 9999; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; white-space: nowrap; max-width: 85vw; overflow: hidden; text-overflow: ellipsis; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  .sidebar { position: fixed; top: 0; right: -100%; width: 90%; max-width: 360px; height: 100%; background: var(--deep); z-index: 2000; transition: 0.4s; padding: 25px; box-shadow: -10px 0 40px rgba(0,0,0,0.7); display: flex; flex-direction: column; border-left: 1px solid var(--purple); }
+  /* ── FAB carrito ── */
+  .cart-fab { position: fixed; bottom: 28px; right: 20px; z-index: 500; background: var(--purple); border: none; border-radius: 50%; width: 58px; height: 58px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 20px rgba(123,94,167,0.5), 0 0 0 1px rgba(169,143,208,0.2); transition: transform 0.2s, box-shadow 0.2s, opacity 0.25s; }
+  .cart-fab:active { transform: scale(0.93); }
+  .cart-fab:hover { box-shadow: 0 6px 28px rgba(123,94,167,0.7), 0 0 0 1px rgba(169,143,208,0.3); }
+  #cartBadge { position: absolute; top: -4px; right: -4px; background: var(--gold); color: #111; border-radius: 999px; min-width: 20px; height: 20px; padding: 0 5px; font-weight: 700; font-size: 0.72rem; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+  #cartBadge.bump { transform: scale(1.4); }
+
+  /* ── Sidebar ── */
+  .sidebar { position: fixed; top: 0; right: -100%; width: 90%; max-width: 360px; height: 100%; background: var(--deep); z-index: 2000; transition: 0.4s; padding: 20px; box-shadow: -10px 0 40px rgba(0,0,0,0.7); display: flex; flex-direction: column; border-left: 1px solid var(--purple); }
   .sidebar.open { right: 0; }
-  .cart-list { flex: 1; overflow-y: auto; margin: 20px 0; padding-right: 5px; }
-  .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; }
-  .cart-item-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.2rem; padding: 0 5px; transition: color 0.2s; }
+  .cart-list { flex: 1; overflow-y: auto; margin: 12px 0; padding-right: 5px; }
+
+  /* ── Ítem carrito con +/- ── */
+  .cart-item { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.07); padding-bottom: 12px; }
+  .cart-item-info { flex: 1; min-width: 0; }
+  .cart-item-title { font-size: 0.85rem; color: var(--moonlight); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cart-item-sub { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+  .qty-controls { display: flex; align-items: center; gap: 4px; }
+  .qty-btn { background: rgba(255,255,255,0.07); border: 1px solid rgba(169,143,208,0.2); color: var(--text); border-radius: 5px; width: 24px; height: 24px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s; line-height: 1; }
+  .qty-btn:active { background: rgba(169,143,208,0.2); }
+  .qty-num { font-size: 0.85rem; color: var(--moonlight); font-weight: 600; min-width: 18px; text-align: center; }
+  .cart-item-price { font-weight: 700; color: var(--gold); font-size: 0.9rem; white-space: nowrap; }
+  .cart-item-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 2px 4px; transition: color 0.2s; flex-shrink: 0; }
   .cart-item-remove:hover { color: #ff6b6b; }
+
+  /* ── Barra de progreso pedido ── */
+  .cart-progress { margin: 10px 0 6px; }
+  .cart-progress-label { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); margin-bottom: 5px; }
+  .cart-progress-bar { height: 4px; background: rgba(255,255,255,0.07); border-radius: 999px; overflow: hidden; }
+  .cart-progress-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--lavender)); border-radius: 999px; transition: width 0.4s ease; }
+
   .cart-empty { text-align: center; color: var(--muted); font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.1rem; padding: 40px 0; }
+  .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .cart-total-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .cart-total-amount { font-weight: 700; color: var(--gold); font-size: 1.4rem; }
   .checkout-btn { background: #25D366; color: white; border: none; width: 100%; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.9rem; transition: opacity 0.2s; }
   .checkout-btn:active { opacity: 0.8; }
 
-  #loading { text-align: center; padding: 60px; color: var(--lavender); font-size: 1.2rem; }
   .no-results { text-align: center; color: var(--muted); font-style: italic; padding: 40px; grid-column: span 2; }
 </style>
 </head>
@@ -101,12 +157,9 @@
   <p class="welcome-text">"Un jardín secreto, donde cada libro es una puerta hacia mundos que esperan ser descubiertos, bajo la luz de la luna."</p>
   <div class="info-details">
     <p class="info-highlight">Trabajamos con libros originales y nuevos bajo pedido. ✨📚</p>
-    <p>Los pagos se realizan en 2 cuotas:<br>
-    • La primera al momento de hacer el pedido.<br>
-    • La segunda al momento de la entrega, o —si eres de otra ciudad— al momento de realizar el envío.</p>
     <p>Métodos de pago disponibles:<br>
     <span class="info-highlight">Binance, Zelle, Zinli y efectivo. 💳</span></p>
-    <p style="font-style:italic; margin-top:15px;">Gracias por confiar en nosotros. ❤️</p>
+    <p style="font-style:italic; margin-top:10px;">Gracias por confiar en nosotros. ❤️</p>
   </div>
 </header>
 
@@ -117,13 +170,26 @@
   <select id="genreFilter" class="genre-filter" onchange="applyFilters()">
     <option value="">Todos los géneros</option>
   </select>
+  <select id="sortSelect" class="sort-select" onchange="applyFilters()">
+    <option value="">Ordenar</option>
+    <option value="price-asc">Precio: menor a mayor</option>
+    <option value="price-desc">Precio: mayor a menor</option>
+    <option value="title-asc">Título: A → Z</option>
+    <option value="title-desc">Título: Z → A</option>
+  </select>
+</div>
+
+<div class="results-bar">
+  <span class="results-count" id="resultsCount"></span>
 </div>
 
 <main>
-  <div id="loading">✨ Desplegando el jardín...</div>
-  <div class="grid" id="productGrid"></div>
+  <!-- Skeleton loader: se muestra mientras carga -->
+  <div class="grid" id="skeletonGrid"></div>
+  <div class="grid" id="productGrid" style="display:none;"></div>
 </main>
 
+<!-- Modal detalle libro -->
 <div id="modal" class="modal" onclick="closeModal()">
   <div class="modal-content" onclick="event.stopPropagation()">
     <span class="modal-close" onclick="closeModal()">×</span>
@@ -131,17 +197,19 @@
     <h2 id="modalTitle" style="font-family:'Cormorant Garamond',serif; color:var(--moonlight); font-size:1.25rem; margin-bottom:4px;"></h2>
     <p id="modalAuthor" style="color:var(--lavender); font-style:italic; font-size:0.82rem; margin-bottom:7px;"></p>
     <div id="modalGenres" class="modal-genres"></div>
-    <p id="modalDesc" style="font-size:0.9rem; line-height:1.6; color:var(--text); max-height:80px; overflow-y:auto; font-size:0.82rem;"></p>
+    <p id="modalDesc" style="font-size:0.82rem; line-height:1.6; color:var(--text); max-height:80px; overflow-y:auto;"></p>
     <div id="modalPrice" style="color:var(--gold); font-weight:bold; font-size:1.2rem; margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:8px;"></div>
     <div class="modal-actions">
       <button class="modal-btn modal-btn-buy" onclick="buyNowModal()">🛍 Comprar ahora</button>
-      <button class="modal-btn modal-btn-cart" onclick="addToCartModal()">🛒 Añadir al carrito</button>
+      <button class="modal-btn modal-btn-cart" onclick="addToCartModal()">🛒 Al carrito</button>
     </div>
+    <button class="modal-share" onclick="shareBook()">🔗 Compartir este libro</button>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
 
+<!-- Modal carrito vacío -->
 <div id="emptyCartModal" class="modal" onclick="closeEmptyCart()">
   <div class="modal-content" style="text-align:center; padding:30px 20px;" onclick="event.stopPropagation()">
     <div style="font-size:3rem; margin-bottom:10px;">🌙</div>
@@ -151,23 +219,43 @@
   </div>
 </div>
 
+<!-- Sidebar carrito -->
 <div id="sidebar" class="sidebar">
-  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--purple); padding-bottom:15px;">
-    <h2 style="font-family:'Cormorant Garamond',serif; color:var(--moonlight); font-size:1.8rem;">Tu Pedido</h2>
-    <span onclick="toggleCart()" style="cursor:pointer; font-size:2.2rem; color:var(--muted);">×</span>
+  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(169,143,208,0.2); padding-bottom:12px;">
+    <h2 style="font-family:'Cormorant Garamond',serif; color:var(--moonlight); font-size:1.6rem;">Tu Pedido</h2>
+    <span onclick="toggleCart()" style="cursor:pointer; font-size:2rem; color:var(--muted); line-height:1;">×</span>
+  </div>
+  <!-- Barra de progreso -->
+  <div class="cart-progress" id="cartProgress" style="display:none;">
+    <div class="cart-progress-label">
+      <span id="progressText"></span>
+      <span id="progressItems"></span>
+    </div>
+    <div class="cart-progress-bar"><div class="cart-progress-fill" id="progressFill" style="width:0%"></div></div>
   </div>
   <div id="cartList" class="cart-list"></div>
-  <div id="cartTotal" style="font-weight:bold; margin-bottom:25px; color:var(--gold); font-size:1.4rem; text-align:right;"></div>
+  <div class="cart-total-row" id="cartTotalRow" style="display:none;">
+    <span class="cart-total-label">Total del pedido</span>
+    <span class="cart-total-amount" id="cartTotal"></span>
+  </div>
   <button class="checkout-btn" onclick="sendOrder()">Finalizar Pedido 🌙</button>
 </div>
+
+<!-- FAB flotante carrito -->
+<button class="cart-fab" onclick="toggleCart()" aria-label="Abrir carrito">
+  🛒
+  <span id="cartBadge">0</span>
+</button>
 
 <script>
 var URL_CSV = "https://docs.google.com/spreadsheets/d/1XyYs7UJAhu8nKhhlHWCrxFbP4TU5GaXKA2K5fQhneVU/export?format=csv&gid=0";
 var WHATSAPP = "584125713381";
+var CART_GOAL = 5; // libros para llenar la barra de progreso
 var products = [];
 var cart = [];
 var currentModalId = null;
 
+/* ── Estrellas ── */
 function createStars() {
   var container = document.getElementById('stars');
   for (var i = 0; i < 85; i++) {
@@ -176,14 +264,32 @@ function createStars() {
     star.style.left = (Math.random() * 100) + '%';
     star.style.top = (Math.random() * 100) + '%';
     var size = Math.random() * 2.2 + 0.8;
-    star.style.width = size + 'px';
-    star.style.height = size + 'px';
+    star.style.width = size + 'px'; star.style.height = size + 'px';
     star.style.setProperty('--duration', (Math.random() * 3 + 1.5) + 's');
     container.appendChild(star);
   }
 }
 createStars();
 
+/* ── Skeleton loader ── */
+function showSkeleton() {
+  var grid = document.getElementById('skeletonGrid');
+  var html = '';
+  for (var i = 0; i < 6; i++) {
+    html += '<div class="skeleton-card">' +
+      '<div class="skeleton-img"></div>' +
+      '<div class="skeleton-body">' +
+        '<div class="skeleton-line"></div>' +
+        '<div class="skeleton-line short"></div>' +
+        '<div class="skeleton-line price"></div>' +
+      '</div>' +
+    '</div>';
+  }
+  grid.innerHTML = html;
+}
+showSkeleton();
+
+/* ── URL estable Google Drive ── */
 function getStableImageUrl(rawImg) {
   if (!rawImg) return '';
   if (rawImg.indexOf('drive.google.com') !== -1) {
@@ -195,11 +301,20 @@ function getStableImageUrl(rawImg) {
   return rawImg;
 }
 
+/* ── Carga con caché en sessionStorage ── */
 async function loadData() {
   try {
-    var response = await fetch(URL_CSV);
-    var data = await response.text();
-    Papa.parse(data, {
+    var cached = sessionStorage.getItem('sgb_products');
+    var rawData;
+    if (cached) {
+      rawData = cached;
+    } else {
+      var response = await fetch(URL_CSV);
+      rawData = await response.text();
+      sessionStorage.setItem('sgb_products', rawData);
+    }
+
+    Papa.parse(rawData, {
       header: false,
       skipEmptyLines: true,
       complete: function(results) {
@@ -207,10 +322,12 @@ async function loadData() {
         products = rows.map(function(cols, index) {
           var rawPrice = cols[4] ? String(cols[4]).replace(/[^0-9.-]+/g, '') : '0';
           var rawImg = cols[6] ? cols[6].trim() : '';
-          // Separar géneros por coma, limpiar espacios, eliminar vacíos
           var genres = cols[3]
             ? cols[3].split(',').map(function(g) { return g.trim(); }).filter(function(g) { return g.length > 0; })
             : ['General'];
+          // col[7] = disponibilidad (opcional): si dice "agotado" o "no", se marca sin stock
+          var rawStock = cols[7] ? cols[7].trim().toLowerCase() : '';
+          var inStock = rawStock !== 'agotado' && rawStock !== 'no' && rawStock !== '0';
           return {
             id: index,
             title: cols[1] || 'Sin título',
@@ -218,17 +335,19 @@ async function loadData() {
             genres: genres,
             price: parseFloat(rawPrice) || 0,
             desc: cols[5] || 'Este libro guarda secretos que solo descubrirás al leerlo...',
-            img: getStableImageUrl(rawImg)
+            img: getStableImageUrl(rawImg),
+            inStock: inStock
           };
         }).filter(function(p) { return p.title !== 'Sin título'; });
 
         populateGenres();
-        document.getElementById('loading').style.display = 'none';
+        document.getElementById('skeletonGrid').style.display = 'none';
+        document.getElementById('productGrid').style.display = 'grid';
         renderGrid(products);
       }
     });
   } catch(e) {
-    document.getElementById('loading').innerText = 'Hubo un error al cargar el jardín.';
+    document.getElementById('skeletonGrid').innerHTML = '<p style="grid-column:span 2; text-align:center; color:var(--muted); padding:40px;">Hubo un error al cargar el jardín.</p>';
     console.error(e);
   }
 }
@@ -245,26 +364,40 @@ function populateGenres() {
   var select = document.getElementById('genreFilter');
   unique.forEach(function(g) {
     var opt = document.createElement('option');
-    opt.value = g;
-    opt.textContent = g;
+    opt.value = g; opt.textContent = g;
     select.appendChild(opt);
   });
 }
 
+/* ── Filtros + orden + contador ── */
 function applyFilters() {
   var term = document.getElementById('searchInput').value.toLowerCase();
   var genre = document.getElementById('genreFilter').value;
+  var sort = document.getElementById('sortSelect').value;
+
   var filtered = products.filter(function(p) {
-    var matchText = !term ||
-      p.title.toLowerCase().indexOf(term) !== -1 ||
-      p.author.toLowerCase().indexOf(term) !== -1;
-    // Un libro aparece si CUALQUIERA de sus géneros coincide
+    var matchText = !term || p.title.toLowerCase().indexOf(term) !== -1 || p.author.toLowerCase().indexOf(term) !== -1;
     var matchGenre = !genre || p.genres.indexOf(genre) !== -1;
     return matchText && matchGenre;
   });
+
+  if (sort === 'price-asc')  filtered.sort(function(a,b){ return a.price - b.price; });
+  if (sort === 'price-desc') filtered.sort(function(a,b){ return b.price - a.price; });
+  if (sort === 'title-asc')  filtered.sort(function(a,b){ return a.title.localeCompare(b.title); });
+  if (sort === 'title-desc') filtered.sort(function(a,b){ return b.title.localeCompare(a.title); });
+
+  // Contador de resultados
+  var count = document.getElementById('resultsCount');
+  if (term || genre || sort) {
+    count.innerText = filtered.length + ' de ' + products.length + ' libros';
+  } else {
+    count.innerText = products.length + ' libros en el catálogo';
+  }
+
   renderGrid(filtered);
 }
 
+/* ── Render con lazy loading e imagen fade-in ── */
 function renderGrid(lista) {
   var grid = document.getElementById('productGrid');
   if (lista.length === 0) {
@@ -275,8 +408,14 @@ function renderGrid(lista) {
     var tagsHtml = p.genres.map(function(g) {
       return '<span class="genre-tag">' + g + '</span>';
     }).join('');
-    return '<div class="card" onclick="openModal(' + p.id + ')">' +
-      '<img src="' + p.img + '" class="card-img" onerror="this.src=\'https://placehold.co/300x400/111c3a/a98fd0?text=The+Secret+Gardens\'">' +
+    var badgeHtml = p.inStock ? '' : '<span class="badge-agotado">Agotado</span>';
+    var outClass = p.inStock ? '' : ' out-of-stock';
+    return '<div class="card' + outClass + '" onclick="openModal(' + p.id + ')">' +
+      '<div class="card-wrap">' +
+        badgeHtml +
+        '<img data-src="' + p.img + '" class="card-img" ' +
+          'onerror="this.src=\'https://placehold.co/300x400/111c3a/a98fd0?text=The+Secret+Gardens\'; this.classList.add(\'loaded\')">' +
+      '</div>' +
       '<div class="card-body">' +
         '<div class="card-title">' + p.title + '</div>' +
         '<div class="card-genres">' + tagsHtml + '</div>' +
@@ -288,8 +427,40 @@ function renderGrid(lista) {
       '</div>' +
     '</div>';
   }).join('');
+
+  // Lazy loading con IntersectionObserver
+  lazyLoadImages();
+
+  // Mostrar contador inicial
+  if (!document.getElementById('resultsCount').innerText) {
+    document.getElementById('resultsCount').innerText = products.length + ' libros en el catálogo';
+  }
 }
 
+function lazyLoadImages() {
+  var imgs = document.querySelectorAll('.card-img[data-src]');
+  if ('IntersectionObserver' in window) {
+    var obs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var img = entry.target;
+          img.src = img.dataset.src;
+          img.onload = function() { img.classList.add('loaded'); };
+          obs.unobserve(img);
+        }
+      });
+    }, { rootMargin: '100px' });
+    imgs.forEach(function(img) { obs.observe(img); });
+  } else {
+    // fallback sin observer
+    imgs.forEach(function(img) {
+      img.src = img.dataset.src;
+      img.onload = function() { img.classList.add('loaded'); };
+    });
+  }
+}
+
+/* ── Modal ── */
 function openModal(id) {
   var p = products.find(function(x) { return x.id === id; });
   currentModalId = id;
@@ -303,16 +474,16 @@ function openModal(id) {
   document.getElementById('modalPrice').innerText = '$' + p.price.toFixed(2);
   document.getElementById('modal').style.display = 'flex';
   document.body.style.overflow = 'hidden';
-  document.querySelector('.cart-fab').style.opacity = '0';
-  document.querySelector('.cart-fab').style.pointerEvents = 'none';
+  var fab = document.querySelector('.cart-fab');
+  fab.style.opacity = '0'; fab.style.pointerEvents = 'none';
 }
 
 function closeModal() {
   document.getElementById('modal').style.display = 'none';
   document.body.style.overflow = 'auto';
   currentModalId = null;
-  document.querySelector('.cart-fab').style.opacity = '1';
-  document.querySelector('.cart-fab').style.pointerEvents = 'auto';
+  var fab = document.querySelector('.cart-fab');
+  fab.style.opacity = '1'; fab.style.pointerEvents = 'auto';
 }
 
 function buyNowModal() {
@@ -322,12 +493,39 @@ function addToCartModal() {
   if (currentModalId !== null) { addToCart(currentModalId); closeModal(); }
 }
 
+/* ── Compartir libro ── */
+function shareBook() {
+  if (currentModalId === null) return;
+  var p = products.find(function(x) { return x.id === currentModalId; });
+  var text = '📚 ' + p.title + ' — ' + p.author + '\n💰 $' + p.price.toFixed(2) + '\n\n🌙 The Secret Gardens Books\nEscríbenos por WhatsApp para pedirlo.';
+  if (navigator.share) {
+    navigator.share({ title: p.title, text: text }).catch(function(){});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() { showToast('✅ Info del libro copiada'); });
+  } else {
+    showToast('📋 Copia el título y compártelo');
+  }
+}
+
+/* ── Carrito ── */
 function addToCart(id) {
   var p = products.find(function(x) { return x.id === id; });
+  if (!p.inStock) return;
   var exists = cart.find(function(x) { return x.id === id; });
   if (exists) { exists.qty++; } else { cart.push(Object.assign({}, p, { qty: 1 })); }
   updateUI();
   showToast('📚 "' + p.title + '" añadido al carrito');
+}
+
+function changeQty(index, delta) {
+  cart[index].qty += delta;
+  if (cart[index].qty <= 0) cart.splice(index, 1);
+  updateUI();
+}
+
+function removeFromCart(index) {
+  cart.splice(index, 1);
+  updateUI();
 }
 
 function showToast(msg) {
@@ -338,37 +536,55 @@ function showToast(msg) {
 }
 
 function updateUI() {
-  var total = cart.reduce(function(acc, item) { return acc + item.qty; }, 0);
+  // Badge con animación bump
+  var totalItems = cart.reduce(function(acc, item) { return acc + item.qty; }, 0);
   var badge = document.getElementById('cartBadge');
-  badge.innerText = total;
+  badge.innerText = totalItems;
   badge.classList.remove('bump');
   void badge.offsetWidth;
   badge.classList.add('bump');
   setTimeout(function() { badge.classList.remove('bump'); }, 200);
+
   var cartList = document.getElementById('cartList');
+  var progressEl = document.getElementById('cartProgress');
+  var totalRowEl = document.getElementById('cartTotalRow');
+
   if (cart.length === 0) {
     cartList.innerHTML = '<div class="cart-empty">🌙 Tu carrito está vacío</div>';
     document.getElementById('cartTotal').innerText = '';
+    progressEl.style.display = 'none';
+    totalRowEl.style.display = 'none';
     return;
   }
+
+  // Barra de progreso
+  progressEl.style.display = 'block';
+  totalRowEl.style.display = 'flex';
+  var pct = Math.min(100, Math.round((totalItems / CART_GOAL) * 100));
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').innerText = totalItems >= CART_GOAL ? '¡Pedido completo! 🎉' : 'Progreso del pedido';
+  document.getElementById('progressItems').innerText = totalItems + ' / ' + CART_GOAL + ' libros';
+
+  // Lista con +/−
   var totalMoney = 0;
   cartList.innerHTML = cart.map(function(item, i) {
     totalMoney += item.price * item.qty;
     return '<div class="cart-item">' +
-      '<div style="flex:1;">' +
-        '<div style="font-size:0.9rem;color:var(--moonlight);font-weight:500;">' + item.title + '</div>' +
-        '<div style="font-size:0.75rem;color:var(--muted);">Cant: ' + item.qty + '</div>' +
+      '<div class="cart-item-info">' +
+        '<div class="cart-item-title">' + item.title + '</div>' +
+        '<div class="cart-item-sub">' + item.author + '</div>' +
       '</div>' +
-      '<div style="font-weight:bold;color:var(--gold);margin-right:10px;">$' + (item.price * item.qty).toFixed(2) + '</div>' +
+      '<div class="qty-controls">' +
+        '<button class="qty-btn" onclick="changeQty(' + i + ', -1)">−</button>' +
+        '<span class="qty-num">' + item.qty + '</span>' +
+        '<button class="qty-btn" onclick="changeQty(' + i + ', 1)">+</button>' +
+      '</div>' +
+      '<span class="cart-item-price">$' + (item.price * item.qty).toFixed(2) + '</span>' +
       '<button class="cart-item-remove" onclick="removeFromCart(' + i + ')" title="Eliminar">✕</button>' +
     '</div>';
   }).join('');
-  document.getElementById('cartTotal').innerText = 'Total: $' + totalMoney.toFixed(2);
-}
 
-function removeFromCart(index) {
-  cart.splice(index, 1);
-  updateUI();
+  document.getElementById('cartTotal').innerText = '$' + totalMoney.toFixed(2);
 }
 
 function toggleCart() { document.getElementById('sidebar').classList.toggle('open'); }
@@ -399,14 +615,9 @@ function closeEmptyCart() {
 }
 
 document.getElementById('searchInput').addEventListener('input', applyFilters);
+
 loadData();
 updateUI();
 </script>
-
-<!-- Botón flotante carrito -->
-<button class="cart-fab" onclick="toggleCart()" aria-label="Abrir carrito">
-  🛒
-  <span id="cartBadge">0</span>
-</button>
 </body>
 </html>

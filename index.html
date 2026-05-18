@@ -344,6 +344,7 @@ async function loadData() {
         document.getElementById('skeletonGrid').style.display = 'none';
         document.getElementById('productGrid').style.display = 'grid';
         renderGrid(products);
+        checkUrlParam();
       }
     });
   } catch(e) {
@@ -497,13 +498,14 @@ function addToCartModal() {
 function shareBook() {
   if (currentModalId === null) return;
   var p = products.find(function(x) { return x.id === currentModalId; });
-  var text = '📚 ' + p.title + ' — ' + p.author + '\n💰 $' + p.price.toFixed(2) + '\n\n🌙 The Secret Gardens Books\nEscríbenos por WhatsApp para pedirlo.';
+  var url = 'https://secretgardenbooks.github.io/the-secret-gardens-books/?libro=' + p.id;
+  var text = '📚 *' + p.title + '* — ' + p.author + '\n💰 $' + p.price.toFixed(2) + '\n\n🌙 The Secret Gardens Books\n👉 ' + url;
   if (navigator.share) {
-    navigator.share({ title: p.title, text: text }).catch(function(){});
+    navigator.share({ title: p.title, text: text, url: url }).catch(function(){});
   } else if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(function() { showToast('✅ Info del libro copiada'); });
+    navigator.clipboard.writeText(url).then(function() { showToast('✅ Link copiado al portapapeles'); });
   } else {
-    showToast('📋 Copia el título y compártelo');
+    showToast('📋 ' + url);
   }
 }
 
@@ -615,6 +617,19 @@ function closeEmptyCart() {
 }
 
 document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+/* ── Abrir libro directo desde URL ── */
+function checkUrlParam() {
+  var params = new URLSearchParams(window.location.search);
+  var libroId = params.get('libro');
+  if (libroId !== null) {
+    var id = parseInt(libroId, 10);
+    var p = products.find(function(x) { return x.id === id; });
+    if (p) {
+      setTimeout(function() { openModal(id); }, 300);
+    }
+  }
+}
 
 loadData();
 updateUI();

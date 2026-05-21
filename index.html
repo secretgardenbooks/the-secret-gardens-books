@@ -44,7 +44,7 @@
 
   /* ── Grid ── */
   main { position: relative; z-index: 1; padding: 0.8rem 0.8rem 6rem; }
-  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
 
   /* ── Skeleton loader ── */
   .skeleton-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(169,143,208,0.08); border-radius: 10px; overflow: hidden; }
@@ -74,7 +74,55 @@
   .btn-cart { background: var(--purple); }
 
   /* ── Badge sin stock ── */
-  .badge-agotado { position: absolute; top: 8px; left: 8px; background: rgba(180,60,60,0.85); color: white; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 999px; backdrop-filter: blur(4px); }
+  .tags-more-btn {
+  font-size: 0.46rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(169,143,208,0.1);
+  border: 1px solid rgba(169,143,208,0.2);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 1px 6px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+.tags-more-btn:hover {
+  background: rgba(169,143,208,0.2);
+  color: var(--lavender);
+}
+.tags-overflow {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  vertical-align: middle;
+}
+
+.cover-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.48rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 999px;
+  padding: 2px 6px;
+  margin-bottom: 4px;
+  font-weight: 600;
+  border: 1px solid;
+}
+.cover-blanda {
+  background: rgba(169,143,208,0.12);
+  border-color: rgba(169,143,208,0.3);
+  color: var(--lavender);
+}
+.cover-dura {
+  background: rgba(212,184,150,0.12);
+  border-color: rgba(212,184,150,0.35);
+  color: var(--gold);
+}
+
+.badge-agotado { position: absolute; top: 8px; left: 8px; background: rgba(180,60,60,0.85); color: white; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 999px; backdrop-filter: blur(4px); }
   .card-wrap { position: relative; }
   .card.out-of-stock .btn-buy,
   .card.out-of-stock .btn-cart { opacity: 0.35; pointer-events: none; cursor: not-allowed; }
@@ -139,7 +187,7 @@
   .checkout-btn { background: #25D366; color: white; border: none; width: 100%; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.9rem; transition: opacity 0.2s; }
   .checkout-btn:active { opacity: 0.8; }
 
-  .no-results { text-align: center; color: var(--muted); font-style: italic; padding: 40px; grid-column: span 2; }
+  .no-results { text-align: center; color: var(--muted); font-style: italic; padding: 40px; grid-column: span 3; }
 </style>
 </head>
 <body>
@@ -194,7 +242,8 @@
     <span class="modal-close" onclick="closeModal()">×</span>
     <img id="modalImg" src="" class="modal-img" onerror="this.src='https://placehold.co/300x400/111c3a/a98fd0?text=The+Secret+Gardens'">
     <h2 id="modalTitle" style="font-family:'Cormorant Garamond',serif; color:var(--moonlight); font-size:1.25rem; margin-bottom:4px;"></h2>
-    <p id="modalAuthor" style="color:var(--lavender); font-style:italic; font-size:0.82rem; margin-bottom:7px;"></p>
+    <span id="modalCover" class="cover-badge" style="display:none; margin-bottom:6px; position:relative; z-index:1;"></span>
+  <p id="modalAuthor" style="color:var(--lavender); font-style:italic; font-size:0.82rem; margin-bottom:7px;"></p>
     <div id="modalGenres" class="modal-genres"></div>
     <p id="modalDesc" style="font-size:0.82rem; line-height:1.6; color:var(--text); max-height:80px; overflow-y:auto;"></p>
     <div id="modalPrice" style="color:var(--gold); font-weight:bold; font-size:1.2rem; margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:8px;"></div>
@@ -324,9 +373,27 @@ async function loadData() {
         products = rows.map(function(cols, index) {
           var rawPrice = cols[4] ? String(cols[4]).replace(/[^0-9.-]+/g, '') : '0';
           var rawImg = cols[6] ? cols[6].trim() : '';
-          var genres = cols[3]
-            ? cols[3].split(',').map(function(g) { return g.trim(); }).filter(function(g) { return g.length > 0; })
-            : ['General'];
+          // Stop-words que no sirven como etiqueta
+          var STOP = ['de','del','la','el','los','las','y','e','a','en','con','por','para','un','una','o','u','al'];
+          var genres = (function() {
+            if (!cols[3]) return ['General'];
+            var seen = {};
+            var tags = [];
+            // Primero separar por coma
+            cols[3].split(',').forEach(function(phrase) {
+              // Luego cada frase separarla por espacio
+              phrase.trim().split(/\s+/).forEach(function(word) {
+                var w = word.trim().replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]/g, '');
+                if (!w || w.length < 3) return;
+                var wl = w.toLowerCase();
+                if (STOP.indexOf(wl) !== -1) return;
+                // Capitalizar primera letra
+                var tag = w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+                if (!seen[tag]) { seen[tag] = true; tags.push(tag); }
+              });
+            });
+            return tags.length ? tags : ['General'];
+          })();
           // col[7] = disponibilidad (opcional): si dice "agotado" o "no", se marca sin stock
           var rawStock = cols[7] ? cols[7].trim().toLowerCase() : '';
           var inStock = rawStock !== 'agotado' && rawStock !== 'no' && rawStock !== '0';
@@ -338,7 +405,8 @@ async function loadData() {
             price: parseFloat(rawPrice) || 0,
             desc: cols[5] || 'Este libro guarda secretos que solo descubrirás al leerlo...',
             img: getStableImageUrl(rawImg),
-            inStock: inStock
+            inStock: inStock,
+            cover: cols[8] ? cols[8].trim() : ''
           };
         }).filter(function(p) { return p.title !== 'Sin título'; });
 
@@ -421,8 +489,22 @@ function renderGrid(lista) {
       '</div>' +
       '<div class="card-body">' +
         '<div class="card-title">' + p.title + '</div>' +
-        '<div class="card-genres">' + tagsHtml + '</div>' +
-        '<div class="card-price">$' + p.price.toFixed(2) + '</div>' +
+        (p.cover ? '<span class="cover-badge ' + (p.cover.toLowerCase().indexOf('dura') !== -1 ? 'cover-dura' : 'cover-blanda') + '">' + (p.cover.toLowerCase().indexOf('dura') !== -1 ? '📗' : '📄') + ' ' + p.cover + '</span>' : '') +
+        (function() {
+          var MAX_VISIBLE = 3;
+          var visibleTags = p.genres.slice(0, MAX_VISIBLE).map(function(g) {
+            return '<span class="genre-tag">' + g + '</span>';
+          }).join('');
+          var hiddenTags = p.genres.slice(MAX_VISIBLE);
+          var hiddenHtml = hiddenTags.length
+            ? '<span class="tags-overflow" id="extra-' + p.id + '" style="display:none; flex-wrap:wrap; gap:2px;">'  +
+              hiddenTags.map(function(g){ return '<span class="genre-tag" style="margin-right:2px;">' + g + '</span>'; }).join('') +
+              '</span>' +
+              '<button class="tags-more-btn" onclick="event.stopPropagation();toggleTags(' + p.id + ',this)">+' + hiddenTags.length + ' más</button>'
+            : '';
+          return '<div class="card-genres">' + visibleTags + hiddenHtml + '</div>';
+        })() +
+        (p.price ? '<div class="card-price">$' + p.price.toFixed(2) + '</div>' : '<div class="card-price" style="font-size:0.72rem;color:var(--muted);font-weight:400;">Consultar precio</div>') +
         '<div class="btn-group">' +
           '<button class="btn btn-buy" onclick="event.stopPropagation();buyNow(' + p.id + ')">Comprar</button>' +
           '<button class="btn btn-cart" onclick="event.stopPropagation();addToCart(' + p.id + ')">Carrito</button>' +
@@ -470,11 +552,29 @@ function openModal(id) {
   document.getElementById('modalImg').src = p.img;
   document.getElementById('modalTitle').innerText = p.title;
   document.getElementById('modalAuthor').innerText = p.author;
+  var coverEl = document.getElementById('modalCover');
+  if (p.cover) {
+    var isDura = p.cover.toLowerCase().indexOf('dura') !== -1;
+    coverEl.className = 'cover-badge ' + (isDura ? 'cover-dura' : 'cover-blanda');
+    coverEl.innerHTML = (isDura ? '📗' : '📄') + ' ' + p.cover;
+    coverEl.style.display = 'inline-flex';
+  } else {
+    coverEl.style.display = 'none';
+  }
   document.getElementById('modalGenres').innerHTML = p.genres.map(function(g) {
     return '<span class="modal-genre-tag">' + g + '</span>';
   }).join('');
   document.getElementById('modalDesc').innerText = p.desc;
-  document.getElementById('modalPrice').innerText = '$' + p.price.toFixed(2);
+  var mpEl = document.getElementById('modalPrice');
+  if (p.price) {
+    mpEl.innerText = '$' + p.price.toFixed(2);
+    mpEl.style.color = 'var(--gold)';
+  } else {
+    mpEl.innerText = 'Consultar precio';
+    mpEl.style.color = 'var(--muted)';
+    mpEl.style.fontSize = '0.85rem';
+    mpEl.style.fontWeight = '400';
+  }
   document.getElementById('modal').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   var fab = document.querySelector('.cart-fab');
@@ -622,6 +722,18 @@ function sendOrder() {
 function closeEmptyCart() {
   document.getElementById('emptyCartModal').style.display = 'none';
   document.body.style.overflow = 'auto';
+}
+
+function toggleTags(id, btn) {
+  var extra = document.getElementById('extra-' + id);
+  if (!extra) return;
+  if (extra.style.display === 'none') {
+    extra.style.display = 'inline-flex';
+    btn.innerText = 'Ver menos';
+  } else {
+    extra.style.display = 'none';
+    btn.innerText = '+' + extra.querySelectorAll('.genre-tag').length + ' más';
+  }
 }
 
 document.getElementById('searchInput').addEventListener('input', applyFilters);

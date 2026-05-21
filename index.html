@@ -67,8 +67,8 @@
   .card-price { color: var(--gold); font-weight: 600; font-size: 1.1rem; margin: 8px 0; }
   .card-genres { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 8px; }
   .genre-tag { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.04em; background: rgba(123,94,167,0.2); border: 1px solid rgba(169,143,208,0.25); color: var(--lavender); border-radius: 999px; padding: 2px 7px; }
-  .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: auto; }
-  .btn { border: none; padding: 10px 4px; border-radius: 6px; font-size: 0.65rem; text-transform: uppercase; cursor: pointer; color: white; font-weight: 600; transition: opacity 0.2s; }
+  .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: auto; overflow: hidden; }
+  .btn { border: none; padding: 7px 0; border-radius: 6px; font-size: 0.55rem; text-transform: uppercase; cursor: pointer; color: white; font-weight: 700; transition: opacity 0.2s; white-space: nowrap; width: 100%; overflow: hidden; text-overflow: ellipsis; }
   .btn:active { opacity: 0.7; }
   .btn-buy { background: #25D366; }
   .btn-cart { background: var(--purple); }
@@ -507,7 +507,7 @@ function renderGrid(lista) {
         (p.price ? '<div class="card-price">$' + p.price.toFixed(2) + '</div>' : '<div class="card-price" style="font-size:0.72rem;color:var(--muted);font-weight:400;">Consultar precio</div>') +
         '<div class="btn-group">' +
           '<button class="btn btn-buy" onclick="event.stopPropagation();buyNow(' + p.id + ')">Comprar</button>' +
-          '<button class="btn btn-cart" onclick="event.stopPropagation();addToCart(' + p.id + ')">Carrito</button>' +
+          '<button class="btn btn-cart" onclick="event.stopPropagation();addToCart(' + p.id + ')">+ Añadir</button>' +
         '</div>' +
       '</div>' +
     '</div>';

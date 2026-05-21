@@ -590,10 +590,18 @@ function closeModal() {
 }
 
 function buyNowModal() {
-  if (currentModalId !== null) { closeModal(); buyNow(currentModalId); }
+  if (currentModalId !== null) {
+    var id = currentModalId; // guardar ANTES de closeModal()
+    closeModal();
+    buyNow(id);
+  }
 }
 function addToCartModal() {
-  if (currentModalId !== null) { addToCart(currentModalId); closeModal(); }
+  if (currentModalId !== null) {
+    var id = currentModalId;
+    addToCart(id);
+    closeModal();
+  }
 }
 
 /* ── Compartir libro ── */

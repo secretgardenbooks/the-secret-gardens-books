@@ -507,7 +507,7 @@ function renderGrid(lista) {
         (p.price ? '<div class="card-price">$' + p.price.toFixed(2) + '</div>' : '<div class="card-price" style="font-size:0.72rem;color:var(--muted);font-weight:400;">Consultar precio</div>') +
         '<div class="btn-group">' +
           '<button class="btn btn-buy" onclick="event.stopPropagation();buyNow(' + p.id + ')">Comprar</button>' +
-          '<button class="btn btn-cart" onclick="event.stopPropagation();addToCart(' + p.id + ')">+ Carrito</button>' +
+          '<button class="btn btn-cart" onclick="event.stopPropagation();addToCart(' + p.id + ')">+ Añadir</button>' +
         '</div>' +
       '</div>' +
     '</div>';
@@ -701,7 +701,8 @@ function toggleCart() { document.getElementById('sidebar').classList.toggle('ope
 
 function buyNow(id) {
   var p = products.find(function(x) { return x.id === id; });
-  var msg = encodeURIComponent('🌙 *The Secret Gardens Books*\n\n*Pedido:*\n• ' + p.title + ' — ' + p.author + ' (x1) — $' + p.price.toFixed(2) + '\n\n*Total: $' + p.price.toFixed(2) + '*\n\n_(Enviado desde el catálogo)_');
+  var priceStr = p.price ? '$' + p.price.toFixed(2) : 'Consultar precio';
+  var msg = encodeURIComponent('🌙 *The Secret Gardens Books*\n\n*Pedido:*\n• ' + p.title + ' — ' + p.author + ' (x1) — ' + priceStr + '\n\n*Total: ' + priceStr + '*\n\n_(Enviado desde el catálogo)_');
   window.open('https://wa.me/' + WHATSAPP + '?text=' + msg);
 }
 

@@ -355,14 +355,17 @@ function getStableImageUrl(rawImg) {
 /* ── Carga con caché en sessionStorage ── */
 async function loadData() {
   try {
-    var cached = sessionStorage.getItem('sgb_products');
+    // Caché con clave versionada para evitar datos viejos
+    var cacheKey = 'sgb_' + URL_CSV.slice(-20).replace(/[^a-z0-9]/gi,'');
+    var cached = sessionStorage.getItem(cacheKey);
     var rawData;
     if (cached) {
       rawData = cached;
     } else {
+      sessionStorage.clear();
       var response = await fetch(URL_CSV);
       rawData = await response.text();
-      sessionStorage.setItem('sgb_products', rawData);
+      sessionStorage.setItem(cacheKey, rawData);
     }
 
     Papa.parse(rawData, {
@@ -379,34 +382,33 @@ async function loadData() {
             if (!cols[3]) return ['General'];
             var seen = {};
             var tags = [];
-            // Primero separar por coma
-            cols[3].split(',').forEach(function(phrase) {
-              // Luego cada frase separarla por espacio
+            // Separar por coma Y por salto de línea
+            var raw = cols[3].replace(/\n/g, ',').replace(/\r/g, '');
+            raw.split(',').forEach(function(phrase) {
               phrase.trim().split(/\s+/).forEach(function(word) {
                 var w = word.trim().replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]/g, '');
                 if (!w || w.length < 3) return;
                 var wl = w.toLowerCase();
                 if (STOP.indexOf(wl) !== -1) return;
-                // Capitalizar primera letra
                 var tag = w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
                 if (!seen[tag]) { seen[tag] = true; tags.push(tag); }
               });
             });
             return tags.length ? tags : ['General'];
           })();
-          // col[7] = disponibilidad (opcional): si dice "agotado" o "no", se marca sin stock
+          // col[7] = Stock: "Si" = disponible, "No"/"agotado"/"0" = sin stock, vacío = disponible
           var rawStock = cols[7] ? cols[7].trim().toLowerCase() : '';
-          var inStock = rawStock !== 'agotado' && rawStock !== 'no' && rawStock !== '0';
+          var inStock = !rawStock || rawStock === 'si' || rawStock === 'sí' || rawStock === '1' || rawStock === 'yes';
           return {
             id: index,
-            title: cols[1] || 'Sin título',
-            author: cols[2] || 'Anónimo',
+            title: (cols[1] || '').trim() || 'Sin título',
+            author: (cols[2] || '').trim() || 'Anónimo',
             genres: genres,
             price: parseFloat(rawPrice) || 0,
             desc: cols[5] || 'Este libro guarda secretos que solo descubrirás al leerlo...',
             img: getStableImageUrl(rawImg),
             inStock: inStock,
-            cover: cols[8] ? cols[8].trim() : ''
+            cover: cols[8] ? cols[8].trim().replace(/\n/g,'').replace(/\r/g,'') : ''
           };
         }).filter(function(p) { return p.title !== 'Sin título'; });
 
@@ -591,7 +593,7 @@ function closeModal() {
 
 function buyNowModal() {
   if (currentModalId !== null) {
-    var id = currentModalId; // guardar ANTES de closeModal()
+    var id = currentModalId;
     closeModal();
     buyNow(id);
   }

@@ -1,281 +1,156 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Terminal de Administración — SGB</title>
-<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Cormorant+Garamond:wght@400;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<style>
-  :root {
-    --navy: #0d1b3e; --deep: #111c3a; --purple: #7b5ea7;
-    --lavender: #a98fd0; --gold: #d4b896; --text: #e2ddf0;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--navy); color: var(--text); font-family: 'Jost', sans-serif; min-height: 100vh; padding: 20px; }
-  
-  .login-container { max-width: 360px; margin: 100px auto; background: var(--deep); padding: 30px; border-radius: 12px; border: 1px solid var(--purple); text-align: center; box-shadow: 0 0 30px rgba(123,94,167,0.3); }
-  .login-container h2 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; margin-bottom: 20px; color: var(--gold); }
-  
-  input, textarea, select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(169,143,208,0.3); padding: 12px; border-radius: 8px; color: white; margin-bottom: 15px; font-family: inherit; outline: none; display: block; -webkit-appearance: none; appearance: none; }
-  select { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%23a98fd0'><polygon points='0,0 10,0 5,7'/></svg>"); background-repeat: no-repeat; background-position: right 15px center; padding-right: 30px; }
-  input:focus, textarea:focus, select:focus { border-color: var(--purple); background: rgba(255,255,255,0.08); }
-  select option { background: var(--deep); color: var(--text); }
-  
-  button { background: var(--purple); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; transition: 0.3s; }
-  button:hover { background: #8c6fc2; }
-  button:disabled { background: #4a3b63 !important; color: #888 !important; cursor: not-allowed; }
-  
-  .admin-box { max-width: 700px; margin: 0 auto; background: var(--deep); padding: 30px; border-radius: 15px; border: 1px solid rgba(169,143,208,0.2); display: none; margin-bottom: 50px; }
-  .admin-header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid rgba(169,143,208,0.1); padding-bottom: 15px; }
-  .admin-header h1 { font-family: 'Cormorant Garamond', serif; color: var(--gold); font-size: 2.2rem; }
-  
-  .ia-section { background: rgba(123, 94, 167, 0.05); padding: 20px; border-radius: 10px; border: 1px dashed var(--purple); margin-bottom: 25px; }
-  .search-section { background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; border: 1px solid rgba(169,143,208,0.15); margin-bottom: 25px; display: flex; gap: 10px; align-items: flex-end; }
-  .search-section .input-container { flex: 1; }
-  .search-section button { width: auto; white-space: nowrap; height: 46px; margin-bottom: 15px; }
-  
-  .row-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-  .form-group { display: flex; flex-direction: column; }
-  label { font-size: 0.85rem; color: var(--lavender); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 1px; }
-  .status-msg { text-align: center; padding: 12px; margin-top: 15px; border-radius: 6px; font-weight: 500; display: none; }
-  .success { background: rgba(37, 211, 102, 0.15); color: #25D366; border: 1px solid #25D366; }
-  .error { background: rgba(255, 75, 75, 0.15); color: #ff4b4b; border: 1px solid #ff4b4b; }
+// CONFIGURACIÓN DE SEGURIDAD PRIVADA DEL PANEL
+const USUARIO_ADMIN = "bibi";
+const CLAVE_ADMIN = "bibi3011";
+const GEMINI_API_KEY = "AIzaSyD9J5-mXk2nKBNbfw3UJ1n2gaUGNwWCyEE";
 
-  @media(max-width: 580px) {
-    .row-grid { grid-template-columns: 1fr; gap: 0; }
-    .search-section { flex-direction: column; gap: 0; align-items: stretch; }
-    .search-section button { width: 100%; margin-bottom: 0; margin-top: 5px; }
-  }
-</style>
-</head>
-<body>
-
-<div id="loginSection" class="login-container">
-  <h2>Control de Acceso</h2>
-  <input type="text" id="userInput" placeholder="Usuario administrador">
-  <input type="password" id="passInput" placeholder="Contraseña">
-  <button onclick="login()">Ingresar al Jardín</button>
-  <p id="loginError" style="color:#ff4b4b; font-size:0.85rem; margin-top:10px; display:none;">Credenciales incorrectas</p>
-</div>
-
-<div id="adminPanel" class="admin-box">
-  <div class="admin-header">
-    <h1>Terminal de Gestión</h1>
-    <p style="font-size:0.85rem; color:var(--lavender);">The Secret Gardens Books</p>
-  </div>
-  
-  <div class="ia-section">
-    <label style="color:var(--gold); font-weight:600;">✨ Asistente de Autollenado con IA</label>
-    <p style="font-size:0.78rem; color:var(--lavender); margin-bottom:10px;">Pega aquí cualquier bloque de texto desordenado del libro y la IA rellenará el formulario entero.</p>
-    <textarea id="rawIAText" rows="4" placeholder="Ej: Consígueme el libro Alas de Sangre de Rebecca Yarros, cuesta 25$, es de género romance y fantasía, tapa dura..."></textarea>
-    <button id="btnIA" onclick="procesarConIA()" style="background:linear-gradient(45deg, var(--purple), #8c6fc2);">Procesar Texto con IA 🔮</button>
-  </div>
-
-  <div class="search-section">
-    <div class="input-container">
-      <label>Buscar Libro Existente (Por ID)</label>
-      <input type="number" id="searchId" placeholder="Escriba el ID..." style="margin-bottom:0;">
-    </div>
-    <button onclick="buscarLibro()">Buscar 🔍</button>
-  </div>
-
-  <form id="bookForm" onsubmit="guardarDatos(event)">
-    <div class="row-grid">
-      <div class="form-group">
-        <label>ID del Libro (Numérico)</label>
-        <input type="number" id="bookId" required placeholder="Ej: 1">
-      </div>
-      <div class="form-group">
-        <label>Precio de Venta ($)</label>
-        <input type="number" step="0.01" id="bookPrice" required placeholder="0.00">
-      </div>
-    </div>
-
-    <div class="row-grid">
-      <div class="form-group">
-        <label>Título del Libro</label>
-        <input type="text" id="bookTitle" required placeholder="Nombre del libro">
-      </div>
-      <div class="form-group">
-        <label>Autor</label>
-        <input type="text" id="bookAuthor" required placeholder="Nombre del autor">
-      </div>
-    </div>
-
-    <div class="row-grid">
-      <div class="form-group">
-        <label>Género Literario</label>
-        <input type="text" id="bookGenre" required placeholder="Ej: Romance, Fantasía">
-      </div>
-      <div class="form-group">
-        <label>Tipo de Tapa</label>
-        <select id="bookCover">
-          <option value="Tapa Blanda">Tapa Blanda</option>
-          <option value="Tapa Dura">Tapa Dura</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="row-grid">
-      <div class="form-group">
-        <label>Link de Imagen (Google Drive)</label>
-        <input type="text" id="bookImg" required placeholder="Enlace de compartir de Drive">
-      </div>
-      <div class="form-group">
-        <label>¿Disponible en Stock?</label>
-        <select id="bookStock">
-          <option value="Si">Si</option>
-          <option value="No">No</option>
-        </select>
-      </div>
-    </div>
-
-    <label>Sinopsis / Descripción</label>
-    <textarea id="bookDesc" rows="6" required placeholder="Escribe aquí la sinopsis completa..."></textarea>
-
-    <button type="submit" id="submitBtn">Guardar Libro en Excel 🌙</button>
-  </form>
-
-  <div id="statusMsg" class="status-msg"></div>
-</div>
-
-<script>
-const URL_CSV = "https://docs.google.com/spreadsheets/d/1LyKI6OiOagXXQDel0a5NKojaggCccEEMQF43L2fgTuw/export?format=csv&gid=0";
-
-// TU NUEVA DIRECCIÓN DE SERVIDOR DETECTADA Y ACTUALIZADA AQUÍ
-const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbz20ESaixHyeRgRqpetBRySkRowktPd4wfGutNSGwAv1VFL6msWL0HIgXN_senYLSvd/exec";
-
-let sessionUser = "";
-let sessionPass = "";
-
-function login() {
-  const u = document.getElementById('userInput').value.trim();
-  const p = document.getElementById('passInput').value.trim();
-  
-  if(u === "bibi" && p === "bibi3011") {
-    sessionUser = u; sessionPass = p;
-    document.getElementById('loginSection').style.display = 'none';
-    document.getElementById('adminPanel').style.display = 'block';
-  } else {
-    document.getElementById('loginError').style.display = 'block';
-  }
-}
-
-async function procesarConIA() {
-  const texto = document.getElementById('rawIAText').value.trim();
-  if (!texto) return alert("Por favor, introduce algún texto para procesar.");
-  
-  const btn = document.getElementById('btnIA');
-  btn.innerText = "Sincronizando con Gemini AI... ⌛🔮";
-  btn.disabled = true;
-  showStatus("La Inteligencia Artificial está analizando tu texto y calculando el ID. Por favor espera...", "success");
-  
+function doPost(e) {
   try {
-    const response = await fetch(URL_APPS_SCRIPT, {
-      method: "POST",
-      body: JSON.stringify({
-        user: sessionUser,
-        pass: sessionPass,
-        action: "procesarIA",
-        textoBruto: texto
-      })
-    });
-    
-    const resData = await response.json();
-    
-    if (resData.status === "success") {
-      const libro = resData.data;
-      document.getElementById('bookId').value = libro.id || "";
-      document.getElementById('bookTitle').value = libro.titulo || "";
-      document.getElementById('bookAuthor').value = libro.autor || "";
-      document.getElementById('bookGenre').value = libro.genero || "";
-      document.getElementById('bookPrice').value = libro.precio || 0;
-      document.getElementById('bookDesc').value = libro.descripcion || "";
-      document.getElementById('bookCover').value = libro.tapa || "Tapa Blanda";
-      document.getElementById('bookStock').value = "Si";
-      
-      showStatus("¡Campos completados con éxito! Solo añade el link de imagen y guarda.", "success");
-      document.getElementById('rawIAText').value = "";
-    } else {
-      showStatus("Error interno de la IA: " + resData.message, "error");
+    const params = JSON.parse(e.postData.contents);
+
+    // Validación de seguridad básica
+    if (params.user !== USUARIO_ADMIN || params.pass !== CLAVE_ADMIN) {
+      return ContentService.createTextOutput(
+        JSON.stringify({ status: "error", message: "Credenciales inválidas" })
+      ).setMimeType(ContentService.MimeType.JSON);
     }
+
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheets()[0];
+
+    // --- ACCIÓN: Procesar texto con IA ---
+    if (params.action === "procesarIA") {
+      if (!params.textoBruto || String(params.textoBruto).trim() === "") {
+        return ContentService.createTextOutput(
+          JSON.stringify({ status: "error", message: "El texto bruto está vacío." })
+        ).setMimeType(ContentService.MimeType.JSON);
+      }
+
+      // Calcula el siguiente ID libre correctamente:
+      // getLastRow() incluye encabezado, así que el próximo ID = lastRow (filas de datos + 1 por encabezado = índice siguiente)
+      const lastRow = sheet.getLastRow();
+      const nextId = lastRow < 1 ? 1 : lastRow; // Si solo hay encabezado (fila 1), el primer libro es ID 1
+
+      const dataIA = consultarGemini(params.textoBruto, nextId);
+      return ContentService.createTextOutput(
+        JSON.stringify({ status: "success", data: dataIA })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // --- ACCIÓN: Guardar libro ---
+
+    // Validación de campos obligatorios en el servidor
+    const camposRequeridos = ["id", "titulo", "autor", "genero", "descripcion", "imagen"];
+    for (const campo of camposRequeridos) {
+      if (!params[campo] || String(params[campo]).trim() === "") {
+        return ContentService.createTextOutput(
+          JSON.stringify({ status: "error", message: "Campo obligatorio vacío: " + campo })
+        ).setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+
+    const targetId = String(params.id).trim();
+    const data = sheet.getDataRange().getValues();
+    let filaDestino = -1;
+
+    // Busca si el ID ya existe (empieza en i=1 para saltarse el encabezado)
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0]).trim() === targetId) {
+        filaDestino = i + 1; // +1 porque getDataRange es base-0 pero las filas de Sheets son base-1
+        break;
+      }
+    }
+
+    // Si no existe, es un libro nuevo
+    if (filaDestino === -1) {
+      filaDestino = sheet.getLastRow() + 1;
+    }
+
+    // Guardado en una sola operación batch (más rápido y atómico)
+    sheet.getRange(filaDestino, 1, 1, 9).setValues([[
+      targetId,
+      String(params.titulo).trim(),
+      String(params.autor).trim(),
+      String(params.genero).trim(),
+      parseFloat(params.precio) || 0,
+      String(params.descripcion).trim(),
+      String(params.imagen).trim(),
+      params.stock === "No" ? "No" : "Si",
+      (params.tapa === "Tapa Dura") ? "Tapa Dura" : "Tapa Blanda"
+    ]]);
+
+    return ContentService.createTextOutput(
+      JSON.stringify({ status: "success", message: "Libro guardado correctamente" })
+    ).setMimeType(ContentService.MimeType.JSON);
+
   } catch (error) {
-    showStatus("Error de conexión: " + error.message + ". Asegúrate de publicar el Apps Script como 'Nueva versión' y acceso para 'Cualquiera'.", "error");
-  } finally {
-    btn.innerText = "Procesar Texto con IA 🔮";
-    btn.disabled = false;
+    return ContentService.createTextOutput(
+      JSON.stringify({ status: "error", message: error.toString() })
+    ).setMimeType(ContentService.MimeType.JSON);
   }
 }
 
-async function buscarLibro() {
-  const idBuscado = document.getElementById('searchId').value.trim();
-  if(!idBuscado) return alert("Por favor escribe un ID para buscar.");
-  showStatus("Consultando base de datos...", "success");
-  
-  try {
-    const response = await fetch(URL_CSV);
-    const textData = await response.text();
-    Papa.parse(textData, {
-      header: false,
-      skipEmptyLines: true,
-      complete: function(results) {
-        const rows = results.data.slice(1);
-        const libro = rows.find(r => String(r[0]).trim() === idBuscado);
-        if(libro) {
-          document.getElementById('bookId').value = libro[0] || "";
-          document.getElementById('bookTitle').value = libro[1] || "";
-          document.getElementById('bookAuthor').value = libro[2] || "";
-          document.getElementById('bookGenre').value = libro[3] || "";
-          document.getElementById('bookPrice').value = libro[4] ? libro[4].replace(/[^0-9.-]+/g,"") : "0";
-          document.getElementById('bookDesc').value = libro[5] || "";
-          document.getElementById('bookImg').value = libro[6] || "";
-          let stockVal = libro[7] ? libro[7].trim().toLowerCase() : "si";
-          document.getElementById('bookStock').value = (stockVal === "no" || stockVal === "0" || stockVal === "agotado") ? "No" : "Si";
-          document.getElementById('bookCover').value = libro[8] || "Tapa Blanda";
-          showStatus("¡Libro cargado! Modifica lo que necesites y guarda.", "success");
-        } else {
-          showStatus("El ID no existe. Guardará como un libro nuevo.", "error");
-          document.getElementById('bookId').value = idBuscado;
-          document.getElementById('bookStock').value = "Si";
-        }
-      }
-    });
-  } catch (error) { showStatus("Error: " + error.message, "error"); }
-}
+// Conexión con Gemini AI
+function consultarGemini(texto, sugeridoId) {
+  const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY;
 
-async function guardarDatos(event) {
-  event.preventDefault();
-  const btn = document.getElementById('submitBtn');
-  btn.innerText = "Sincronizando con Excel... ⌛";
-  btn.disabled = true;
+  const prompt =
+    "Analiza el siguiente texto bruto sobre un libro y extrae la informacion estructurada estrictamente en formato JSON plano " +
+    "(sin marcas de codigo, sin bloques de markdown, solo las llaves del JSON puro). " +
+    "Si faltan datos como precio, usa 0. " +
+    "En tapa debes elegir estrictamente entre: Tapa Blanda o Tapa Dura. " +
+    "Genera una sinopsis comercial y atrapante basada en los datos disponibles. " +
+    "El JSON debe tener exactamente estas llaves: id, titulo, autor, genero, precio, descripcion, tapa. " +
+    "El valor de id debe ser el numero entero: " + sugeridoId + ". " +
+    "El valor de precio debe ser un numero decimal sin simbolos de moneda. " +
+    "Texto bruto: " + texto;
 
   const payload = {
-    user: sessionUser, pass: sessionPass,
-    id: document.getElementById('bookId').value.trim(),
-    titulo: document.getElementById('bookTitle').value.trim(),
-    autor: document.getElementById('bookAuthor').value.trim(),
-    genero: document.getElementById('bookGenre').value.trim(),
-    precio: parseFloat(document.getElementById('bookPrice').value) || 0,
-    descripcion: document.getElementById('bookDesc').value.trim(),
-    imagen: document.getElementById('bookImg').value.trim(),
-    stock: document.getElementById('bookStock').value,
-    tapa: document.getElementById('bookCover').value
+    contents: [{ parts: [{ text: prompt }] }]
   };
 
+  const opciones = {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  };
+
+  const respuesta = UrlFetchApp.fetch(url, opciones);
+  const jsonRes = JSON.parse(respuesta.getContentText());
+
+  // Validación robusta de la respuesta de Gemini
+  if (
+    !jsonRes.candidates ||
+    !jsonRes.candidates[0] ||
+    !jsonRes.candidates[0].content ||
+    !jsonRes.candidates[0].content.parts ||
+    !jsonRes.candidates[0].content.parts[0]
+  ) {
+    const motivo = jsonRes.promptFeedback ? JSON.stringify(jsonRes.promptFeedback) : "Respuesta inesperada de Gemini";
+    throw new Error("Gemini no devolvió una estructura válida. Motivo: " + motivo);
+  }
+
+  let textoIa = jsonRes.candidates[0].content.parts[0].text;
+
+  // Limpieza de markdown residual
+  textoIa = textoIa.replace(/```json/gi, "").replace(/```/g, "").trim();
+
+  // Intenta parsear y lanza error descriptivo si falla
+  let resultado;
   try {
-    await fetch(URL_APPS_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-    showStatus("¡Guardado exitoso en tu Google Sheets!", "success");
-    document.getElementById('bookForm').reset();
-    document.getElementById('searchId').value = "";
-  } catch (error) { showStatus("Error al guardar: " + error.message, "error"); }
-  finally { btn.innerText = "Guardar Libro en Excel 🌙"; btn.disabled = false; }
+    resultado = JSON.parse(textoIa);
+  } catch (parseError) {
+    throw new Error("Gemini devolvió texto que no es JSON válido: " + textoIa.substring(0, 200));
+  }
+
+  // Fuerza el ID al valor calculado (por si Gemini lo ignoró)
+  resultado.id = sugeridoId;
+
+  return resultado;
 }
 
-function showStatus(text, type) {
-  const el = document.getElementById('statusMsg');
-  el.innerText = text; el.className = "status-msg " + type; el.style.display = "block";
+function doGet() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+  const data = sheet.getDataRange().getValues();
+  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
 }
-</script>
-</body>
-</html>

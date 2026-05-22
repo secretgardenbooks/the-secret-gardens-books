@@ -1,156 +1,769 @@
-// CONFIGURACIÓN DE SEGURIDAD PRIVADA DEL PANEL
-const USUARIO_ADMIN = "bibi";
-const CLAVE_ADMIN = "bibi3011";
-const GEMINI_API_KEY = "AIzaSyD9J5-mXk2nKBNbfw3UJ1n2gaUGNwWCyEE";
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Secret Gardens Books — Catálogo</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
-function doPost(e) {
+<style>
+  :root {
+    --navy: #0d1b3e; --deep: #111c3a; --purple: #7b5ea7;
+    --lavender: #a98fd0; --lilac: #c9b8e8; --moonlight: #e8e2f5;
+    --star: #f5f0ff; --gold: #d4b896; --text: #e2ddf0; --muted: #9990b8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--navy); color: var(--text); font-family: 'Jost', sans-serif; min-height: 100vh; overflow-x: hidden; position: relative; }
+
+  /* ── Estrellas ── */
+  .stars-container { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(circle at center, #111c3a 0%, #0d1b3e 100%); }
+  .star { position: absolute; background: white; border-radius: 50%; opacity: 0.5; animation: twinkle var(--duration) infinite ease-in-out; }
+  @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
+
+  /* ── Header ── */
+  header { position: relative; text-align: center; padding: 2.5rem 1rem; border-bottom: 1px solid rgba(169,143,208,.2); z-index: 1; }
+  .logo-img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 30px rgba(123,94,167,0.4); border: 2px solid rgba(169,143,208,0.3); }
+  .logo-text h1 { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: var(--moonlight); text-shadow: 0 0 20px rgba(169,143,208,0.5); margin-top: 10px; }
+  .welcome-text { max-width: 500px; margin: 1.5rem auto 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.1rem; color: var(--lavender); line-height: 1.4; padding: 0 1rem; }
+  .info-details { max-width: 500px; margin: 1.2rem auto 0; font-size: 0.85rem; color: var(--lavender); line-height: 1.6; padding: 0 1.5rem; }
+  .info-details p { margin-bottom: 10px; }
+  .info-highlight { color: var(--moonlight); font-weight: 400; }
+
+  /* ── Controles ── */
+  .controls { position: sticky; top: 0; z-index: 100; background: rgba(13,27,62,0.95); backdrop-filter: blur(10px); padding: 0.8rem 1rem; border-bottom: 1px solid rgba(169,143,208,0.15); display: flex; gap: 10px; flex-wrap: wrap; }
+  .search-box { flex: 1; min-width: 150px; background: rgba(255,255,255,0.05); border: 1px solid rgba(169,143,208,0.25); border-radius: 999px; padding: 0.5rem 1.2rem; }
+  .search-box input { background: transparent; border: none; outline: none; color: var(--text); width: 100%; font-size: 0.9rem; }
+  .search-box input::placeholder { color: var(--muted); }
+  .genre-filter, .sort-select { background: rgba(255,255,255,0.05); border: 1px solid rgba(169,143,208,0.25); border-radius: 999px; padding: 0.5rem 1rem; color: var(--text); font-size: 0.82rem; outline: none; cursor: pointer; }
+  .genre-filter option, .sort-select option { background: var(--deep); color: var(--text); }
+
+  /* ── Contador de resultados ── */
+  .results-bar { position: relative; z-index: 1; padding: 0.5rem 1.2rem 0; }
+  .results-count { font-size: 0.75rem; color: var(--muted); font-style: italic; }
+
+  /* ── Grid ── */
+  main { position: relative; z-index: 1; padding: 0.8rem 0.8rem 6rem; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+
+  /* ── Skeleton loader ── */
+  .skeleton-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(169,143,208,0.08); border-radius: 10px; overflow: hidden; }
+  .skeleton-img { width: 100%; aspect-ratio: 3/4; background: linear-gradient(90deg, rgba(169,143,208,0.05) 25%, rgba(169,143,208,0.12) 50%, rgba(169,143,208,0.05) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+  .skeleton-body { padding: 0.8rem; }
+  .skeleton-line { height: 12px; border-radius: 6px; background: linear-gradient(90deg, rgba(169,143,208,0.05) 25%, rgba(169,143,208,0.12) 50%, rgba(169,143,208,0.05) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; margin-bottom: 8px; }
+  .skeleton-line.short { width: 55%; }
+  .skeleton-line.price { width: 40%; height: 16px; margin-top: 6px; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  /* ── Cards ── */
+  .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(169,143,208,0.12); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: border-color 0.3s, transform 0.2s; }
+  .card:active { transform: scale(0.98); }
+  .card:hover { border-color: rgba(169,143,208,0.3); }
+  /* lazy load: imagen oculta hasta cargar */
+  .card-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: rgba(123,94,167,0.08); border-bottom: 1px solid rgba(169,143,208,0.1); opacity: 0; transition: opacity 0.4s ease; }
+  .card-img.loaded { opacity: 1; }
+  .card-body { padding: 0.8rem; flex: 1; display: flex; flex-direction: column; }
+  .card-title { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: var(--moonlight); line-height: 1.2; height: 2.4em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .card-price { color: var(--gold); font-weight: 600; font-size: 1.1rem; margin: 8px 0; }
+  .card-genres { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 8px; }
+  .genre-tag { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.04em; background: rgba(123,94,167,0.2); border: 1px solid rgba(169,143,208,0.25); color: var(--lavender); border-radius: 999px; padding: 2px 7px; }
+  .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: auto; overflow: hidden; }
+  .btn { border: none; padding: 7px 0; border-radius: 6px; font-size: 0.55rem; text-transform: uppercase; cursor: pointer; color: white; font-weight: 700; transition: opacity 0.2s; white-space: nowrap; width: 100%; overflow: hidden; text-overflow: ellipsis; }
+  .btn:active { opacity: 0.7; }
+  .btn-buy { background: #25D366; }
+  .btn-cart { background: var(--purple); }
+
+  /* ── Badge sin stock ── */
+  .tags-more-btn {
+  font-size: 0.46rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(169,143,208,0.1);
+  border: 1px solid rgba(169,143,208,0.2);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 1px 6px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+.tags-more-btn:hover {
+  background: rgba(169,143,208,0.2);
+  color: var(--lavender);
+}
+.tags-overflow {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  vertical-align: middle;
+}
+
+.cover-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.48rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 999px;
+  padding: 2px 6px;
+  margin-bottom: 4px;
+  font-weight: 600;
+  border: 1px solid;
+}
+.cover-blanda {
+  background: rgba(169,143,208,0.12);
+  border-color: rgba(169,143,208,0.3);
+  color: var(--lavender);
+}
+.cover-dura {
+  background: rgba(212,184,150,0.12);
+  border-color: rgba(212,184,150,0.35);
+  color: var(--gold);
+}
+
+.badge-agotado { position: absolute; top: 8px; left: 8px; background: rgba(180,60,60,0.85); color: white; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 999px; backdrop-filter: blur(4px); }
+  .card-wrap { position: relative; }
+  .card.out-of-stock .btn-buy,
+  .card.out-of-stock .btn-cart { opacity: 0.35; pointer-events: none; cursor: not-allowed; }
+  .card.out-of-stock .card-img { filter: grayscale(40%); }
+
+  /* ── Modal ── */
+  .modal { position: fixed; inset: 0; background: rgba(5,10,25,0.95); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px); }
+  .modal-content { background: var(--deep); border: 1px solid var(--purple); border-radius: 15px; width: 100%; max-width: 320px; padding: 15px; position: relative; animation: pop 0.3s ease; max-height: 82vh; overflow-y: auto; }
+  @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-close { position: absolute; top: 10px; right: 15px; font-size: 1.8rem; color: var(--muted); cursor: pointer; line-height: 1; z-index: 1; }
+  .modal-img { width: 100%; border-radius: 10px; margin-bottom: 10px; border: 1px solid rgba(169,143,208,0.2); box-shadow: 0 6px 14px rgba(0,0,0,0.5); max-height: 240px; object-fit: contain; background: rgba(10,15,35,0.8); }
+  .modal-genres { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+  .modal-genre-tag { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em; background: rgba(123,94,167,0.25); border: 1px solid rgba(169,143,208,0.3); color: var(--lavender); border-radius: 999px; padding: 3px 10px; }
+  .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .modal-btn { border: none; padding: 9px; border-radius: 8px; font-size: 0.75rem; text-transform: uppercase; cursor: pointer; color: white; font-weight: 700; transition: opacity 0.2s; }
+  .modal-btn:active { opacity: 0.7; }
+  .modal-btn-buy { background: #25D366; }
+  .modal-btn-cart { background: var(--purple); }
+  /* Compartir libro */
+  .modal-share { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 8px; background: none; border: 1px solid rgba(169,143,208,0.2); border-radius: 8px; padding: 7px; width: 100%; color: var(--muted); font-size: 0.72rem; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
+  .modal-share:hover { color: var(--lavender); border-color: rgba(169,143,208,0.4); }
+
+  /* ── Toast ── */
+  .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--purple); color: white; padding: 10px 22px; border-radius: 999px; font-size: 0.85rem; font-weight: 500; z-index: 9999; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; white-space: nowrap; max-width: 85vw; overflow: hidden; text-overflow: ellipsis; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── FAB carrito ── */
+  .cart-fab { position: fixed; bottom: 28px; right: 20px; z-index: 500; background: var(--purple); border: none; border-radius: 50%; width: 58px; height: 58px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 20px rgba(123,94,167,0.5), 0 0 0 1px rgba(169,143,208,0.2); transition: transform 0.2s, box-shadow 0.2s, opacity 0.25s; }
+  .cart-fab:active { transform: scale(0.93); }
+  .cart-fab:hover { box-shadow: 0 6px 28px rgba(123,94,167,0.7), 0 0 0 1px rgba(169,143,208,0.3); }
+  #cartBadge { position: absolute; top: -4px; right: -4px; background: var(--gold); color: #111; border-radius: 999px; min-width: 20px; height: 20px; padding: 0 5px; font-weight: 700; font-size: 0.72rem; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+  #cartBadge.bump { transform: scale(1.4); }
+
+  /* ── Sidebar ── */
+  .sidebar { position: fixed; top: 0; right: -100%; width: 90%; max-width: 360px; height: 100%; background: var(--deep); z-index: 2000; transition: 0.4s; padding: 20px; box-shadow: -10px 0 40px rgba(0,0,0,0.7); display: flex; flex-direction: column; border-left: 1px solid var(--purple); }
+  .sidebar.open { right: 0; }
+  .cart-list { flex: 1; overflow-y: auto; margin: 12px 0; padding-right: 5px; }
+
+  /* ── Ítem carrito con +/- ── */
+  .cart-item { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.07); padding-bottom: 12px; }
+  .cart-item-info { flex: 1; min-width: 0; }
+  .cart-item-title { font-size: 0.85rem; color: var(--moonlight); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cart-item-sub { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+  .qty-controls { display: flex; align-items: center; gap: 4px; }
+  .qty-btn { background: rgba(255,255,255,0.07); border: 1px solid rgba(169,143,208,0.2); color: var(--text); border-radius: 5px; width: 24px; height: 24px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s; line-height: 1; }
+  .qty-btn:active { background: rgba(169,143,208,0.2); }
+  .qty-num { font-size: 0.85rem; color: var(--moonlight); font-weight: 600; min-width: 18px; text-align: center; }
+  .cart-item-price { font-weight: 700; color: var(--gold); font-size: 0.9rem; white-space: nowrap; }
+  .cart-item-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 2px 4px; transition: color 0.2s; flex-shrink: 0; }
+  .cart-item-remove:hover { color: #ff6b6b; }
+
+  /* ── Barra de progreso pedido ── */
+  .cart-progress { margin: 10px 0 6px; }
+  .cart-progress-label { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); margin-bottom: 5px; }
+  .cart-progress-bar { height: 4px; background: rgba(255,255,255,0.07); border-radius: 999px; overflow: hidden; }
+  .cart-progress-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--lavender)); border-radius: 999px; transition: width 0.4s ease; }
+
+  .cart-empty { text-align: center; color: var(--muted); font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.1rem; padding: 40px 0; }
+  .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .cart-total-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .cart-total-amount { font-weight: 700; color: var(--gold); font-size: 1.4rem; }
+  .checkout-btn { background: #25D366; color: white; border: none; width: 100%; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.9rem; transition: opacity 0.2s; }
+  .checkout-btn:active { opacity: 0.8; }
+
+  .no-results { text-align: center; color: var(--muted); font-style: italic; padding: 40px; grid-column: span 3; }
+</style>
+</head>
+<body>
+
+<div class="stars-container" id="stars"></div>
+
+<header>
+  <div class="logo-wrap">
+    <img src="https://drive.google.com/thumbnail?id=11AFSWDWBU8cKap0G_AVcGjF5ITofF025&sz=w200" class="logo-img" alt="The Secret Gardens Logo" onerror="this.style.display='none'">
+    <div class="logo-text">
+      <h1>The Secret Gardens</h1>
+      
+    </div>
+  </div>
+  <p class="welcome-text">Donde incluso los libros raros echan raíz. 📚</p>
+  <div class="info-details">
+    <p>Métodos de pago disponibles:<br>
+    <span class="info-highlight">Binance, Zelle, Zinli y efectivo. 💳</span></p>
+    <p style="font-style:italic; margin-top:10px;">Gracias por confiar en nosotros. ❤️</p>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Buscar por título o autor...">
+  </div>
+  <select id="genreFilter" class="genre-filter" onchange="applyFilters()">
+    <option value="">Todos los géneros</option>
+  </select>
+  <select id="sortSelect" class="sort-select" onchange="applyFilters()">
+    <option value="">Ordenar</option>
+    <option value="price-asc">Precio: menor a mayor</option>
+    <option value="price-desc">Precio: mayor a menor</option>
+    <option value="title-asc">Título: A → Z</option>
+    <option value="title-desc">Título: Z → A</option>
+  </select>
+</div>
+
+<div class="results-bar">
+  <span class="results-count" id="resultsCount"></span>
+</div>
+
+<main>
+  <!-- Skeleton loader: se muestra mientras carga -->
+  <div class="grid" id="skeletonGrid"></div>
+  <div class="grid" id="productGrid" style="display:none;"></div>
+</main>
+
+<!-- Modal detalle libro -->
+<div id="modal" class="modal" onclick="closeModal()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <span class="modal-close" onclick="closeModal()">×</span>
+    <img id="modalImg" src="" class="modal-img" onerror="this.src='https://placehold.co/300x400/111c3a/a98fd0?text=The+Secret+Gardens'">
+    <h2 id="modalTitle" style="font-family:'Cormorant Garamond',serif; color:var(--moonlight); font-size:1.25rem; margin-bottom:4px;"></h2>
+    <span id="modalCover" class="cover-badge" style="display:none; margin-bottom:6px; position:relative; z-index:1;"></span>
+  <p id="modalAuthor" style="color:var(--lavender); font-style:italic; font-size:0.82rem; margin-bottom:7px;"></p>
+    <div id="modalGenres" class="modal-genres"></div>
+    <p id="modalDesc" style="font-size:0.82rem; line-height:1.6; color:var(--text); max-height:80px; overflow-y:auto;"></p>
+    <div id="modalPrice" style="color:var(--gold); font-weight:bold; font-size:1.2rem; margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:8px;"></div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-buy" onclick="buyNowModal()">🛍 Comprar ahora</button>
+      <button class="modal-btn modal-btn-cart" onclick="addToCartModal()">🛒 Al carrito</button>
+    </div>
+    <button class="modal-share" onclick="shareBook()">🔗 Compartir este libro</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- Modal carrito vacío -->
+<div id="emptyCartModal" class="modal" onclick="closeEmptyCart()">
+  <div class="modal-content" style="text-align:center; padding:30px 20px;" onclick="event.stopPropagation()">
+    <div style="font-size:3rem; margin-bottom:10px;">🌙</div>
+    <h3 style="font-family:'Cormorant Garamond',serif; color:var(--moonlight); font-size:1.5rem; margin-bottom:10px;">Tu carrito está vacío</h3>
+    <p style="color:var(--lavender); font-style:italic; margin-bottom:20px;">Agrega algunos libros a tu pedido para continuar.</p>
+    <button onclick="closeEmptyCart()" class="modal-btn modal-btn-cart" style="width:100%; font-size:0.9rem; padding:12px;">Seguir explorando</button>
+  </div>
+</div>
+
+<!-- Sidebar carrito -->
+<div id="sidebar" class="sidebar">
+  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(169,143,208,0.2); padding-bottom:12px;">
+    <h2 style="font-family:'Cormorant Garamond',serif; color:var(--moonlight); font-size:1.6rem;">Tu Pedido</h2>
+    <span onclick="toggleCart()" style="cursor:pointer; font-size:2rem; color:var(--muted); line-height:1;">×</span>
+  </div>
+  <!-- Barra de progreso -->
+  <div class="cart-progress" id="cartProgress" style="display:none;">
+    <div class="cart-progress-label">
+      <span id="progressText"></span>
+      <span id="progressItems"></span>
+    </div>
+    <div class="cart-progress-bar"><div class="cart-progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+  <div id="cartList" class="cart-list"></div>
+  <div class="cart-total-row" id="cartTotalRow" style="display:none;">
+    <span class="cart-total-label">Total del pedido</span>
+    <span class="cart-total-amount" id="cartTotal"></span>
+  </div>
+  <button class="checkout-btn" onclick="sendOrder()">Finalizar Pedido 🌙</button>
+</div>
+
+<!-- FAB flotante carrito -->
+<button class="cart-fab" onclick="toggleCart()" aria-label="Abrir carrito">
+  🛒
+  <span id="cartBadge">0</span>
+</button>
+
+<script>
+var URL_CSV = "https://docs.google.com/spreadsheets/d/1LyKI6OiOagXXQDel0a5NKojaggCccEEMQF43L2fgTuw/export?format=csv&gid=0";
+var WHATSAPP = "584125713381";
+var CART_GOAL = 5; // libros para llenar la barra de progreso
+var products = [];
+var cart = (function() {
+  try { return JSON.parse(localStorage.getItem('sgb_cart')) || []; }
+  catch(e) { return []; }
+})();
+var currentModalId = null;
+
+/* ── Estrellas ── */
+function createStars() {
+  var container = document.getElementById('stars');
+  for (var i = 0; i < 85; i++) {
+    var star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = (Math.random() * 100) + '%';
+    star.style.top = (Math.random() * 100) + '%';
+    var size = Math.random() * 2.2 + 0.8;
+    star.style.width = size + 'px'; star.style.height = size + 'px';
+    star.style.setProperty('--duration', (Math.random() * 3 + 1.5) + 's');
+    container.appendChild(star);
+  }
+}
+createStars();
+
+/* ── Skeleton loader ── */
+function showSkeleton() {
+  var grid = document.getElementById('skeletonGrid');
+  var html = '';
+  for (var i = 0; i < 6; i++) {
+    html += '<div class="skeleton-card">' +
+      '<div class="skeleton-img"></div>' +
+      '<div class="skeleton-body">' +
+        '<div class="skeleton-line"></div>' +
+        '<div class="skeleton-line short"></div>' +
+        '<div class="skeleton-line price"></div>' +
+      '</div>' +
+    '</div>';
+  }
+  grid.innerHTML = html;
+}
+showSkeleton();
+
+/* ── URL estable Google Drive ── */
+function getStableImageUrl(rawImg) {
+  if (!rawImg) return '';
+  if (rawImg.indexOf('drive.google.com') !== -1) {
+    var matchD = rawImg.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    var matchId = rawImg.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    var driveId = (matchD && matchD[1]) || (matchId && matchId[1]);
+    if (driveId) return 'https://drive.google.com/thumbnail?id=' + driveId + '&sz=w400';
+  }
+  return rawImg;
+}
+
+/* ── Carga con caché en sessionStorage ── */
+async function loadData() {
   try {
-    const params = JSON.parse(e.postData.contents);
-
-    // Validación de seguridad básica
-    if (params.user !== USUARIO_ADMIN || params.pass !== CLAVE_ADMIN) {
-      return ContentService.createTextOutput(
-        JSON.stringify({ status: "error", message: "Credenciales inválidas" })
-      ).setMimeType(ContentService.MimeType.JSON);
+    // Caché con clave versionada para evitar datos viejos
+    var cacheKey = 'sgb_' + URL_CSV.slice(-20).replace(/[^a-z0-9]/gi,'');
+    var cached = sessionStorage.getItem(cacheKey);
+    var rawData;
+    if (cached) {
+      rawData = cached;
+    } else {
+      sessionStorage.clear();
+      var response = await fetch(URL_CSV);
+      rawData = await response.text();
+      sessionStorage.setItem(cacheKey, rawData);
     }
 
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheets()[0];
+    Papa.parse(rawData, {
+      header: false,
+      skipEmptyLines: true,
+      complete: function(results) {
+        var rows = results.data.slice(1);
+        products = rows.map(function(cols, index) {
+          var rawPrice = cols[4] ? String(cols[4]).replace(/[^0-9.-]+/g, '') : '0';
+          var rawImg = cols[6] ? cols[6].trim() : '';
+          // Stop-words que no sirven como etiqueta
+          var STOP = ['de','del','la','el','los','las','y','e','a','en','con','por','para','un','una','o','u','al'];
+          var genres = (function() {
+            if (!cols[3]) return ['General'];
+            var seen = {};
+            var tags = [];
+            // Separar por coma Y por salto de línea
+            var raw = cols[3].replace(/\n/g, ',').replace(/\r/g, '');
+            raw.split(',').forEach(function(phrase) {
+              phrase.trim().split(/\s+/).forEach(function(word) {
+                var w = word.trim().replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]/g, '');
+                if (!w || w.length < 3) return;
+                var wl = w.toLowerCase();
+                if (STOP.indexOf(wl) !== -1) return;
+                var tag = w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+                if (!seen[tag]) { seen[tag] = true; tags.push(tag); }
+              });
+            });
+            return tags.length ? tags : ['General'];
+          })();
+          // col[7] = Stock: "Si" = disponible, "No"/"agotado"/"0" = sin stock, vacío = disponible
+          var rawStock = cols[7] ? cols[7].trim().toLowerCase() : '';
+          var inStock = !rawStock || rawStock === 'si' || rawStock === 'sí' || rawStock === '1' || rawStock === 'yes';
+          return {
+            id: index,
+            title: (cols[1] || '').trim() || 'Sin título',
+            author: (cols[2] || '').trim() || 'Anónimo',
+            genres: genres,
+            price: parseFloat(rawPrice) || 0,
+            desc: cols[5] || 'Este libro guarda secretos que solo descubrirás al leerlo...',
+            img: getStableImageUrl(rawImg),
+            inStock: inStock,
+            cover: cols[8] ? cols[8].trim().replace(/\n/g,'').replace(/\r/g,'') : ''
+          };
+        }).filter(function(p) { return p.title !== 'Sin título'; });
 
-    // --- ACCIÓN: Procesar texto con IA ---
-    if (params.action === "procesarIA") {
-      if (!params.textoBruto || String(params.textoBruto).trim() === "") {
-        return ContentService.createTextOutput(
-          JSON.stringify({ status: "error", message: "El texto bruto está vacío." })
-        ).setMimeType(ContentService.MimeType.JSON);
+        populateGenres();
+        document.getElementById('skeletonGrid').style.display = 'none';
+        document.getElementById('productGrid').style.display = 'grid';
+        renderGrid(products);
+        checkUrlParam();
       }
-
-      // Calcula el siguiente ID libre correctamente:
-      // getLastRow() incluye encabezado, así que el próximo ID = lastRow (filas de datos + 1 por encabezado = índice siguiente)
-      const lastRow = sheet.getLastRow();
-      const nextId = lastRow < 1 ? 1 : lastRow; // Si solo hay encabezado (fila 1), el primer libro es ID 1
-
-      const dataIA = consultarGemini(params.textoBruto, nextId);
-      return ContentService.createTextOutput(
-        JSON.stringify({ status: "success", data: dataIA })
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // --- ACCIÓN: Guardar libro ---
-
-    // Validación de campos obligatorios en el servidor
-    const camposRequeridos = ["id", "titulo", "autor", "genero", "descripcion", "imagen"];
-    for (const campo of camposRequeridos) {
-      if (!params[campo] || String(params[campo]).trim() === "") {
-        return ContentService.createTextOutput(
-          JSON.stringify({ status: "error", message: "Campo obligatorio vacío: " + campo })
-        ).setMimeType(ContentService.MimeType.JSON);
-      }
-    }
-
-    const targetId = String(params.id).trim();
-    const data = sheet.getDataRange().getValues();
-    let filaDestino = -1;
-
-    // Busca si el ID ya existe (empieza en i=1 para saltarse el encabezado)
-    for (let i = 1; i < data.length; i++) {
-      if (String(data[i][0]).trim() === targetId) {
-        filaDestino = i + 1; // +1 porque getDataRange es base-0 pero las filas de Sheets son base-1
-        break;
-      }
-    }
-
-    // Si no existe, es un libro nuevo
-    if (filaDestino === -1) {
-      filaDestino = sheet.getLastRow() + 1;
-    }
-
-    // Guardado en una sola operación batch (más rápido y atómico)
-    sheet.getRange(filaDestino, 1, 1, 9).setValues([[
-      targetId,
-      String(params.titulo).trim(),
-      String(params.autor).trim(),
-      String(params.genero).trim(),
-      parseFloat(params.precio) || 0,
-      String(params.descripcion).trim(),
-      String(params.imagen).trim(),
-      params.stock === "No" ? "No" : "Si",
-      (params.tapa === "Tapa Dura") ? "Tapa Dura" : "Tapa Blanda"
-    ]]);
-
-    return ContentService.createTextOutput(
-      JSON.stringify({ status: "success", message: "Libro guardado correctamente" })
-    ).setMimeType(ContentService.MimeType.JSON);
-
-  } catch (error) {
-    return ContentService.createTextOutput(
-      JSON.stringify({ status: "error", message: error.toString() })
-    ).setMimeType(ContentService.MimeType.JSON);
+    });
+  } catch(e) {
+    document.getElementById('skeletonGrid').innerHTML = '<p style="grid-column:span 2; text-align:center; color:var(--muted); padding:40px;">Hubo un error al cargar el jardín.</p>';
+    console.error(e);
   }
 }
 
-// Conexión con Gemini AI
-function consultarGemini(texto, sugeridoId) {
-  const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY;
-
-  const prompt =
-    "Analiza el siguiente texto bruto sobre un libro y extrae la informacion estructurada estrictamente en formato JSON plano " +
-    "(sin marcas de codigo, sin bloques de markdown, solo las llaves del JSON puro). " +
-    "Si faltan datos como precio, usa 0. " +
-    "En tapa debes elegir estrictamente entre: Tapa Blanda o Tapa Dura. " +
-    "Genera una sinopsis comercial y atrapante basada en los datos disponibles. " +
-    "El JSON debe tener exactamente estas llaves: id, titulo, autor, genero, precio, descripcion, tapa. " +
-    "El valor de id debe ser el numero entero: " + sugeridoId + ". " +
-    "El valor de precio debe ser un numero decimal sin simbolos de moneda. " +
-    "Texto bruto: " + texto;
-
-  const payload = {
-    contents: [{ parts: [{ text: prompt }] }]
-  };
-
-  const opciones = {
-    method: "post",
-    contentType: "application/json",
-    payload: JSON.stringify(payload),
-    muteHttpExceptions: true
-  };
-
-  const respuesta = UrlFetchApp.fetch(url, opciones);
-  const jsonRes = JSON.parse(respuesta.getContentText());
-
-  // Validación robusta de la respuesta de Gemini
-  if (
-    !jsonRes.candidates ||
-    !jsonRes.candidates[0] ||
-    !jsonRes.candidates[0].content ||
-    !jsonRes.candidates[0].content.parts ||
-    !jsonRes.candidates[0].content.parts[0]
-  ) {
-    const motivo = jsonRes.promptFeedback ? JSON.stringify(jsonRes.promptFeedback) : "Respuesta inesperada de Gemini";
-    throw new Error("Gemini no devolvió una estructura válida. Motivo: " + motivo);
-  }
-
-  let textoIa = jsonRes.candidates[0].content.parts[0].text;
-
-  // Limpieza de markdown residual
-  textoIa = textoIa.replace(/```json/gi, "").replace(/```/g, "").trim();
-
-  // Intenta parsear y lanza error descriptivo si falla
-  let resultado;
-  try {
-    resultado = JSON.parse(textoIa);
-  } catch (parseError) {
-    throw new Error("Gemini devolvió texto que no es JSON válido: " + textoIa.substring(0, 200));
-  }
-
-  // Fuerza el ID al valor calculado (por si Gemini lo ignoró)
-  resultado.id = sugeridoId;
-
-  return resultado;
+function populateGenres() {
+  var seen = {};
+  var unique = [];
+  products.forEach(function(p) {
+    p.genres.forEach(function(g) {
+      if (!seen[g]) { seen[g] = true; unique.push(g); }
+    });
+  });
+  unique.sort();
+  var select = document.getElementById('genreFilter');
+  unique.forEach(function(g) {
+    var opt = document.createElement('option');
+    opt.value = g; opt.textContent = g;
+    select.appendChild(opt);
+  });
 }
 
-function doGet() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
-  const data = sheet.getDataRange().getValues();
-  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+/* ── Filtros + orden + contador ── */
+function applyFilters() {
+  var term = document.getElementById('searchInput').value.toLowerCase();
+  var genre = document.getElementById('genreFilter').value;
+  var sort = document.getElementById('sortSelect').value;
+
+  var filtered = products.filter(function(p) {
+    var matchText = !term || p.title.toLowerCase().indexOf(term) !== -1 || p.author.toLowerCase().indexOf(term) !== -1;
+    var matchGenre = !genre || p.genres.indexOf(genre) !== -1;
+    return matchText && matchGenre;
+  });
+
+  if (sort === 'price-asc')  filtered.sort(function(a,b){ return a.price - b.price; });
+  if (sort === 'price-desc') filtered.sort(function(a,b){ return b.price - a.price; });
+  if (sort === 'title-asc')  filtered.sort(function(a,b){ return a.title.localeCompare(b.title); });
+  if (sort === 'title-desc') filtered.sort(function(a,b){ return b.title.localeCompare(a.title); });
+
+  // Contador de resultados
+  var count = document.getElementById('resultsCount');
+  if (term || genre || sort) {
+    count.innerText = filtered.length + ' de ' + products.length + ' libros';
+  } else {
+    count.innerText = products.length + ' libros en el catálogo';
+  }
+
+  renderGrid(filtered);
 }
+
+/* ── Render con lazy loading e imagen fade-in ── */
+function renderGrid(lista) {
+  var grid = document.getElementById('productGrid');
+  if (lista.length === 0) {
+    grid.innerHTML = '<div class="no-results">✨ No se encontraron libros con ese criterio.</div>';
+    return;
+  }
+  grid.innerHTML = lista.map(function(p) {
+    var tagsHtml = p.genres.map(function(g) {
+      return '<span class="genre-tag">' + g + '</span>';
+    }).join('');
+    var badgeHtml = p.inStock ? '' : '<span class="badge-agotado">Agotado</span>';
+    var outClass = p.inStock ? '' : ' out-of-stock';
+    return '<div class="card' + outClass + '" onclick="openModal(' + p.id + ')">' +
+      '<div class="card-wrap">' +
+        badgeHtml +
+        '<img data-src="' + p.img + '" class="card-img" ' +
+          'onerror="this.src=\'https://placehold.co/300x400/111c3a/a98fd0?text=The+Secret+Gardens\'; this.classList.add(\'loaded\')">' +
+      '</div>' +
+      '<div class="card-body">' +
+        '<div class="card-title">' + p.title + '</div>' +
+        (p.cover ? '<span class="cover-badge ' + (p.cover.toLowerCase().indexOf('dura') !== -1 ? 'cover-dura' : 'cover-blanda') + '">' + (p.cover.toLowerCase().indexOf('dura') !== -1 ? '📗' : '📄') + ' ' + p.cover + '</span>' : '') +
+        (function() {
+          var MAX_VISIBLE = 3;
+          var visibleTags = p.genres.slice(0, MAX_VISIBLE).map(function(g) {
+            return '<span class="genre-tag">' + g + '</span>';
+          }).join('');
+          var hiddenTags = p.genres.slice(MAX_VISIBLE);
+          var hiddenHtml = hiddenTags.length
+            ? '<span class="tags-overflow" id="extra-' + p.id + '" style="display:none; flex-wrap:wrap; gap:2px;">'  +
+              hiddenTags.map(function(g){ return '<span class="genre-tag" style="margin-right:2px;">' + g + '</span>'; }).join('') +
+              '</span>' +
+              '<button class="tags-more-btn" onclick="event.stopPropagation();toggleTags(' + p.id + ',this)">+' + hiddenTags.length + ' más</button>'
+            : '';
+          return '<div class="card-genres">' + visibleTags + hiddenHtml + '</div>';
+        })() +
+        (p.price ? '<div class="card-price">$' + p.price.toFixed(2) + '</div>' : '<div class="card-price" style="font-size:0.72rem;color:var(--muted);font-weight:400;">Consultar precio</div>') +
+        '<div class="btn-group">' +
+          '<button class="btn btn-buy" onclick="event.stopPropagation();buyNow(' + p.id + ')">Comprar</button>' +
+          '<button class="btn btn-cart" onclick="event.stopPropagation();addToCart(' + p.id + ')">+ Añadir</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  // Lazy loading con IntersectionObserver
+  lazyLoadImages();
+
+  // Mostrar contador inicial
+  if (!document.getElementById('resultsCount').innerText) {
+    document.getElementById('resultsCount').innerText = products.length + ' libros en el catálogo';
+  }
+}
+
+function lazyLoadImages() {
+  var imgs = document.querySelectorAll('.card-img[data-src]');
+  if ('IntersectionObserver' in window) {
+    var obs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var img = entry.target;
+          img.src = img.dataset.src;
+          img.onload = function() { img.classList.add('loaded'); };
+          obs.unobserve(img);
+        }
+      });
+    }, { rootMargin: '100px' });
+    imgs.forEach(function(img) { obs.observe(img); });
+  } else {
+    // fallback sin observer
+    imgs.forEach(function(img) {
+      img.src = img.dataset.src;
+      img.onload = function() { img.classList.add('loaded'); };
+    });
+  }
+}
+
+/* ── Modal ── */
+function openModal(id) {
+  var p = products.find(function(x) { return x.id === id; });
+  currentModalId = id;
+  document.getElementById('modalImg').src = p.img;
+  document.getElementById('modalTitle').innerText = p.title;
+  document.getElementById('modalAuthor').innerText = p.author;
+  var coverEl = document.getElementById('modalCover');
+  if (p.cover) {
+    var isDura = p.cover.toLowerCase().indexOf('dura') !== -1;
+    coverEl.className = 'cover-badge ' + (isDura ? 'cover-dura' : 'cover-blanda');
+    coverEl.innerHTML = (isDura ? '📗' : '📄') + ' ' + p.cover;
+    coverEl.style.display = 'inline-flex';
+  } else {
+    coverEl.style.display = 'none';
+  }
+  document.getElementById('modalGenres').innerHTML = p.genres.map(function(g) {
+    return '<span class="modal-genre-tag">' + g + '</span>';
+  }).join('');
+  document.getElementById('modalDesc').innerText = p.desc;
+  var mpEl = document.getElementById('modalPrice');
+  if (p.price) {
+    mpEl.innerText = '$' + p.price.toFixed(2);
+    mpEl.style.color = 'var(--gold)';
+  } else {
+    mpEl.innerText = 'Consultar precio';
+    mpEl.style.color = 'var(--muted)';
+    mpEl.style.fontSize = '0.85rem';
+    mpEl.style.fontWeight = '400';
+  }
+  document.getElementById('modal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  var fab = document.querySelector('.cart-fab');
+  fab.style.opacity = '0'; fab.style.pointerEvents = 'none';
+}
+
+function closeModal() {
+  document.getElementById('modal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+  currentModalId = null;
+  var fab = document.querySelector('.cart-fab');
+  fab.style.opacity = '1'; fab.style.pointerEvents = 'auto';
+}
+
+function buyNowModal() {
+  if (currentModalId !== null) {
+    var id = currentModalId;
+    closeModal();
+    buyNow(id);
+  }
+}
+function addToCartModal() {
+  if (currentModalId !== null) {
+    var id = currentModalId;
+    addToCart(id);
+    closeModal();
+  }
+}
+
+/* ── Compartir libro ── */
+function shareBook() {
+  if (currentModalId === null) return;
+  var p = products.find(function(x) { return x.id === currentModalId; });
+  var url = 'https://secretgardenbooks.github.io/the-secret-gardens-books/?libro=' + p.id;
+  var text = '📚 *' + p.title + '* — ' + p.author + '\n💰 $' + p.price.toFixed(2) + '\n\n🌙 The Secret Gardens Books\n👉 ' + url;
+  if (navigator.share) {
+    navigator.share({ title: p.title, text: text, url: url }).catch(function(){});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function() { showToast('✅ Link copiado al portapapeles'); });
+  } else {
+    showToast('📋 ' + url);
+  }
+}
+
+/* ── Carrito ── */
+function addToCart(id) {
+  var p = products.find(function(x) { return x.id === id; });
+  if (!p.inStock) return;
+  var exists = cart.find(function(x) { return x.id === id; });
+  if (exists) { exists.qty++; } else { cart.push(Object.assign({}, p, { qty: 1 })); }
+  updateUI();
+  showToast('📚 "' + p.title + '" añadido al carrito');
+}
+
+function changeQty(index, delta) {
+  cart[index].qty += delta;
+  if (cart[index].qty <= 0) cart.splice(index, 1);
+  updateUI();
+}
+
+function removeFromCart(index) {
+  cart.splice(index, 1);
+  updateUI();
+}
+
+function showToast(msg) {
+  var toast = document.getElementById('toast');
+  toast.innerText = msg;
+  toast.classList.add('show');
+  setTimeout(function() { toast.classList.remove('show'); }, 2500);
+}
+
+function saveCart() {
+  try { localStorage.setItem('sgb_cart', JSON.stringify(cart)); }
+  catch(e) {}
+}
+
+function updateUI() {
+  saveCart();
+  // Badge con animación bump
+  var totalItems = cart.reduce(function(acc, item) { return acc + item.qty; }, 0);
+  var badge = document.getElementById('cartBadge');
+  badge.innerText = totalItems;
+  badge.classList.remove('bump');
+  void badge.offsetWidth;
+  badge.classList.add('bump');
+  setTimeout(function() { badge.classList.remove('bump'); }, 200);
+
+  var cartList = document.getElementById('cartList');
+  var progressEl = document.getElementById('cartProgress');
+  var totalRowEl = document.getElementById('cartTotalRow');
+
+  if (cart.length === 0) {
+    cartList.innerHTML = '<div class="cart-empty">🌙 Tu carrito está vacío</div>';
+    document.getElementById('cartTotal').innerText = '';
+    progressEl.style.display = 'none';
+    totalRowEl.style.display = 'none';
+    return;
+  }
+
+  // Barra de progreso
+  progressEl.style.display = 'block';
+  totalRowEl.style.display = 'flex';
+  var pct = Math.min(100, Math.round((totalItems / CART_GOAL) * 100));
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').innerText = totalItems >= CART_GOAL ? '¡Pedido completo! 🎉' : 'Progreso del pedido';
+  document.getElementById('progressItems').innerText = totalItems + ' / ' + CART_GOAL + ' libros';
+
+  // Lista con +/−
+  var totalMoney = 0;
+  cartList.innerHTML = cart.map(function(item, i) {
+    totalMoney += item.price * item.qty;
+    return '<div class="cart-item">' +
+      '<div class="cart-item-info">' +
+        '<div class="cart-item-title">' + item.title + '</div>' +
+        '<div class="cart-item-sub">' + item.author + '</div>' +
+      '</div>' +
+      '<div class="qty-controls">' +
+        '<button class="qty-btn" onclick="changeQty(' + i + ', -1)">−</button>' +
+        '<span class="qty-num">' + item.qty + '</span>' +
+        '<button class="qty-btn" onclick="changeQty(' + i + ', 1)">+</button>' +
+      '</div>' +
+      '<span class="cart-item-price">$' + (item.price * item.qty).toFixed(2) + '</span>' +
+      '<button class="cart-item-remove" onclick="removeFromCart(' + i + ')" title="Eliminar">✕</button>' +
+    '</div>';
+  }).join('');
+
+  document.getElementById('cartTotal').innerText = '$' + totalMoney.toFixed(2);
+}
+
+function toggleCart() { document.getElementById('sidebar').classList.toggle('open'); }
+
+function buyNow(id) {
+  var p = products.find(function(x) { return x.id === id; });
+  var priceStr = p.price ? '$' + p.price.toFixed(2) : 'Consultar precio';
+  var msg = encodeURIComponent('🌙 *The Secret Gardens Books*\n\n*Pedido:*\n• ' + p.title + ' — ' + p.author + ' (x1) — ' + priceStr + '\n\n*Total: ' + priceStr + '*\n\n_(Enviado desde el catálogo)_');
+  window.open('https://wa.me/' + WHATSAPP + '?text=' + msg);
+}
+
+function sendOrder() {
+  if (cart.length === 0) {
+    document.getElementById('emptyCartModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    return;
+  }
+  var itemsStr = cart.map(function(p) {
+    return '• ' + p.title + ' — ' + p.author + ' (x' + p.qty + ') — $' + (p.price * p.qty).toFixed(2);
+  }).join('\n');
+  var total = cart.reduce(function(acc, p) { return acc + (p.price * p.qty); }, 0);
+  var msg = encodeURIComponent('🌙 *The Secret Gardens Books*\n\n*Pedido:*\n' + itemsStr + '\n\n*Total: $' + total.toFixed(2) + '*\n\n_(Enviado desde el catálogo)_');
+  window.open('https://wa.me/' + WHATSAPP + '?text=' + msg);
+}
+
+function closeEmptyCart() {
+  document.getElementById('emptyCartModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+
+function toggleTags(id, btn) {
+  var extra = document.getElementById('extra-' + id);
+  if (!extra) return;
+  if (extra.style.display === 'none') {
+    extra.style.display = 'inline-flex';
+    btn.innerText = 'Ver menos';
+  } else {
+    extra.style.display = 'none';
+    btn.innerText = '+' + extra.querySelectorAll('.genre-tag').length + ' más';
+  }
+}
+
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+/* ── Abrir libro directo desde URL ── */
+function checkUrlParam() {
+  var params = new URLSearchParams(window.location.search);
+  var libroId = params.get('libro');
+  if (libroId !== null) {
+    var id = parseInt(libroId, 10);
+    var p = products.find(function(x) { return x.id === id; });
+    if (p) {
+      setTimeout(function() { openModal(id); }, 300);
+    }
+  }
+}
+
+loadData();
+updateUI();
+</script>
+</body>
+</html>

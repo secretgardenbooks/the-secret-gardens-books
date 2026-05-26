@@ -77,6 +77,7 @@ async function loadData() {
         var rows = results.data.slice(1);
         products = rows.map(function(cols, index) {
           var rawPrice = cols[4] ? String(cols[4]).replace(/[^0-9.-]+/g, '') : '0';
+          var parsedPrice = parseFloat(rawPrice) || 0;
           var rawImg = cols[6] ? cols[6].trim() : '';
           var STOP = ['de','del','la','el','los','las','y','e','a','en','con','por','para','un','una','o','u','al'];
           var genres = (function() {
@@ -98,23 +99,36 @@ async function loadData() {
           var rawStock = cols[7] ? cols[7].trim().toLowerCase() : '';
           var inStock = rawStock !== 'agotado' && rawStock !== 'no' && rawStock !== '0';
           
-          // NUEVO: Lógica para la columna K (Top Carrusel)
+          // Lógica para la columna K (Top Carrusel)
           var rawCarousel = cols[10] ? cols[10].trim() : '';
           var carouselMatch = rawCarousel.match(/\d+/);
           var carouselRank = carouselMatch ? parseInt(carouselMatch[0], 10) : null;
+
+          // NUEVO: Lógica Matemática para Columna L (Descuento - Precio Inflado)
+          var rawDiscount = cols[11] ? cols[11].trim() : '';
+          var discountMatch = rawDiscount.match(/\d+/);
+          var discountPercent = discountMatch ? parseInt(discountMatch[0], 10) : 0;
+          var originalPrice = null;
+          
+          // Si escribes un número del 1 al 99 en la columna L, calculará el precio inflado
+          if (discountPercent > 0 && discountPercent < 100 && parsedPrice > 0) {
+            originalPrice = parsedPrice / (1 - (discountPercent / 100));
+          }
 
           return {
             id: index,
             title: cols[1] || 'Sin título',
             author: cols[2] || 'Anónimo',
             genres: genres,
-            price: parseFloat(rawPrice) || 0,
+            price: parsedPrice,
             desc: cols[5] || 'Este libro guarda secretos que solo descubrirás al leerlo...',
             img: getStableImageUrl(rawImg),
             inStock: inStock,
             cover: cols[8] ? cols[8].trim().replace(/\n/g,'').replace(/\r/g,'') : '',
             badge: cols[9] ? cols[9].trim() : '',
-            carouselRank: carouselRank // Asignamos el valor del ranking
+            carouselRank: carouselRank,
+            discountPercent: discountPercent,
+            originalPrice: originalPrice
           };
         }).filter(function(p) { return p.title !== 'Sin título'; });
 
@@ -125,7 +139,6 @@ async function loadData() {
         if(skel) skel.style.display = 'none';
         if(prodGrid) prodGrid.style.display = 'grid';
         
-        // Renderizamos el nuevo carrusel
         renderCarousel();
         renderGrid(products);
         checkUrlParam();
@@ -156,17 +169,15 @@ function populateGenres() {
   });
 }
 
-/* ── NUEVO: Función para dibujar el Carrusel Netflix ── */
+/* ── Función para dibujar el Carrusel Netflix ── */
 function renderCarousel() {
   var sec = document.getElementById('topCarouselSection');
   var track = document.getElementById('carouselTrack');
   if (!sec || !track) return;
 
-  // Filtramos solo los libros que tienen un rango y los ordenamos
   var topBooks = products.filter(function(p) { return p.carouselRank !== null; });
   topBooks.sort(function(a, b) { return a.carouselRank - b.carouselRank; });
 
-  // Si no hay ningún libro marcado como TOP, ocultamos el carrusel
   if (topBooks.length === 0) {
     sec.style.display = 'none';
     return;
@@ -228,7 +239,6 @@ function renderGrid(lista) {
     var badgeHtml = p.inStock ? '' : '<span class="badge-agotado">Agotado</span>';
     var outClass = p.inStock ? '' : ' out-of-stock';
     
-    // Inyección de badges dinámicos personalizados
     var customBadgeHtml = '';
     var badgeClass = '';
     
@@ -242,6 +252,23 @@ function renderGrid(lista) {
         badgeClass = 'badge-destacado';
       }
       customBadgeHtml = `<span class="special-badge ${badgeClass}">${p.badge}</span>`;
+    }
+    
+    // Inyectar bloque del precio (con o sin descuento matemático)
+    var priceHtml = '';
+    if (p.price) {
+      if (p.originalPrice) {
+        priceHtml = `
+          <div class="price-wrap">
+            <span class="price-original">$${p.originalPrice.toFixed(2)}</span>
+            <span class="card-price">$${p.price.toFixed(2)}</span>
+            <span class="discount-tag">-${p.discountPercent}%</span>
+          </div>`;
+      } else {
+        priceHtml = `<div class="card-price">$${p.price.toFixed(2)}</div>`;
+      }
+    } else {
+      priceHtml = `<div class="card-price" style="font-size:0.72rem;color:var(--muted);font-weight:400;">Consultar precio</div>`;
     }
     
     var MAX_VISIBLE = 3;
@@ -267,7 +294,7 @@ function renderGrid(lista) {
           <div class="card-title">${p.title}</div>
           ${p.cover ? `<span class="cover-badge ${p.cover.toLowerCase().indexOf('dura') !== -1 ? 'cover-dura' : 'cover-blanda'}">${p.cover.toLowerCase().indexOf('dura') !== -1 ? '📗' : '📄'} ${p.cover}</span>` : ''}
           <div class="card-genres">${visibleTags}${hiddenHtml}</div>
-          ${p.price ? `<div class="card-price">$${p.price.toFixed(2)}</div>` : '<div class="card-price" style="font-size:0.72rem;color:var(--muted);font-weight:400;">Consultar precio</div>'}
+          ${priceHtml}
           <div class="btn-group">
             <button class="btn btn-buy" onclick="event.stopPropagation();buyNow(${p.id})">Comprar</button>
             <button class="btn btn-cart" onclick="event.stopPropagation();addToCart(${p.id})">+ Añadir</button>
@@ -334,7 +361,12 @@ function openModal(id) {
   
   var mpEl = document.getElementById('modalPrice');
   if (p.price) {
-    mpEl.innerText = '$' + p.price.toFixed(2);
+    if (p.originalPrice) {
+      // Mostrar precio falso tachado junto al precio real y la etiqueta en el modal
+      mpEl.innerHTML = `<span class="price-original" style="font-size:0.9rem;">$${p.originalPrice.toFixed(2)}</span>$${p.price.toFixed(2)} <span class="discount-tag" style="font-size:0.75rem;">-${p.discountPercent}%</span>`;
+    } else {
+      mpEl.innerText = '$' + p.price.toFixed(2);
+    }
     mpEl.style.color = 'var(--gold)';
   } else {
     mpEl.innerText = 'Consultar precio';

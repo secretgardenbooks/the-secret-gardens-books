@@ -97,6 +97,12 @@ async function loadData() {
           })();
           var rawStock = cols[7] ? cols[7].trim().toLowerCase() : '';
           var inStock = rawStock !== 'agotado' && rawStock !== 'no' && rawStock !== '0';
+          
+          // NUEVO: Lógica para la columna K (Top Carrusel)
+          var rawCarousel = cols[10] ? cols[10].trim() : '';
+          var carouselMatch = rawCarousel.match(/\d+/);
+          var carouselRank = carouselMatch ? parseInt(carouselMatch[0], 10) : null;
+
           return {
             id: index,
             title: cols[1] || 'Sin título',
@@ -107,7 +113,8 @@ async function loadData() {
             img: getStableImageUrl(rawImg),
             inStock: inStock,
             cover: cols[8] ? cols[8].trim().replace(/\n/g,'').replace(/\r/g,'') : '',
-            badge: cols[9] ? cols[9].trim() : ''
+            badge: cols[9] ? cols[9].trim() : '',
+            carouselRank: carouselRank // Asignamos el valor del ranking
           };
         }).filter(function(p) { return p.title !== 'Sin título'; });
 
@@ -118,6 +125,8 @@ async function loadData() {
         if(skel) skel.style.display = 'none';
         if(prodGrid) prodGrid.style.display = 'grid';
         
+        // Renderizamos el nuevo carrusel
+        renderCarousel();
         renderGrid(products);
         checkUrlParam();
       }
@@ -145,6 +154,33 @@ function populateGenres() {
     opt.value = g; opt.textContent = g;
     select.appendChild(opt);
   });
+}
+
+/* ── NUEVO: Función para dibujar el Carrusel Netflix ── */
+function renderCarousel() {
+  var sec = document.getElementById('topCarouselSection');
+  var track = document.getElementById('carouselTrack');
+  if (!sec || !track) return;
+
+  // Filtramos solo los libros que tienen un rango y los ordenamos
+  var topBooks = products.filter(function(p) { return p.carouselRank !== null; });
+  topBooks.sort(function(a, b) { return a.carouselRank - b.carouselRank; });
+
+  // Si no hay ningún libro marcado como TOP, ocultamos el carrusel
+  if (topBooks.length === 0) {
+    sec.style.display = 'none';
+    return;
+  }
+
+  sec.style.display = 'block';
+  track.innerHTML = topBooks.map(function(p) {
+    return `
+      <div class="carousel-item" onclick="openModal(${p.id})">
+        <div class="carousel-number">${p.carouselRank}</div>
+        <img class="carousel-img" src="${p.img}" onerror="this.src='https://placehold.co/100x150/111c3a/a98fd0?text=SGB'">
+      </div>
+    `;
+  }).join('');
 }
 
 /* ── Filtros + orden + contador ── */
@@ -402,6 +438,7 @@ function showToast(msg) {
   setTimeout(function() { toast.classList.remove('show'); }, 2500);
 }
 
+// Guardar en el almacenamiento persistente local
 function saveCart() {
   try { localStorage.setItem('sgb_cart', JSON.stringify(cart)); }
   catch(e) {}

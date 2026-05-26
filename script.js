@@ -182,7 +182,7 @@ function applyFilters() {
   renderGrid(filtered);
 }
 
-/* ── Render con lazy loading ── */
+/* ── Render con lazy loading y Badges Personalizados ── */
 function renderGrid(lista) {
   var grid = document.getElementById('productGrid');
   if (!grid) return;
@@ -193,6 +193,23 @@ function renderGrid(lista) {
   grid.innerHTML = lista.map(function(p) {
     var badgeHtml = p.inStock ? '' : '<span class="badge-agotado">Agotado</span>';
     var outClass = p.inStock ? '' : ' out-of-stock';
+    
+    // Procesamiento y renderizado del badge personalizado (Columna 10 del Excel)
+    var customBadgeHtml = '';
+    var badgeClass = '';
+    
+    if (p.inStock && p.badge) {
+      var bTxt = p.badge.toLowerCase();
+      // Condicionales para emparejar colores con las clases CSS de tu archivo de estilos
+      if (bTxt.indexOf('vendido') !== -1 || bTxt.indexOf('oro') !== -1) {
+        badgeClass = 'badge-mas-vendido';
+      } else if (bTxt.indexOf('nuevo') !== -1 || bTxt.indexOf('verde') !== -1) {
+        badgeClass = 'badge-nuevo';
+      } else {
+        badgeClass = 'badge-destacado'; // Por defecto lila decorativo
+      }
+      customBadgeHtml = `<span class="special-badge ${badgeClass}">${p.badge}</span>`;
+    }
     
     var MAX_VISIBLE = 3;
     var visibleTags = p.genres.slice(0, MAX_VISIBLE).map(function(g) {
@@ -210,6 +227,7 @@ function renderGrid(lista) {
       <div class="card${outClass}" onclick="openModal(${p.id})">
         <div class="card-wrap">
           ${badgeHtml}
+          ${customBadgeHtml}
           <img data-src="${p.img}" class="card-img" onerror="this.src='https://placehold.co/300x400/111c3a/a98fd0?text=The+Secret+Gardens'; this.classList.add('loaded')">
         </div>
         <div class="card-body">
@@ -387,6 +405,7 @@ function showToast(msg) {
   setTimeout(function() { toast.classList.remove('show'); }, 2500);
 }
 
+// Guardar en el almacenamiento persistente local
 function saveCart() {
   try { localStorage.setItem('sgb_cart', JSON.stringify(cart)); }
   catch(e) {}

@@ -61,18 +61,16 @@ function getStableImageUrl(rawImg) {
   return rawImg;
 }
 
-/* ── Carga con caché en sessionStorage ── */
+/* ── Carga de datos optimizada en tiempo real (Sin caché local) ── */
 async function loadData() {
   try {
-    var cached = sessionStorage.getItem('sgb_products');
-    var rawData;
-    if (cached) {
-      rawData = cached;
-    } else {
-      var response = await fetch(URL_CSV);
-      rawData = await response.text();
-      sessionStorage.setItem('sgb_products', rawData);
-    }
+    // Rompemos la caché de Google Sheets agregando un timestamp único a la URL
+    var tstamp = new Date().getTime();
+    var urlConAntiCache = URL_CSV + "&t=" + tstamp;
+
+    // Consultamos los datos en vivo sin usar sessionStorage
+    var response = await fetch(urlConAntiCache);
+    var rawData = await response.text();
 
     Papa.parse(rawData, {
       header: false,

@@ -64,11 +64,9 @@ function getStableImageUrl(rawImg) {
 /* ── Carga de datos optimizada en tiempo real (Sin caché local) ── */
 async function loadData() {
   try {
-    // Rompemos la caché de Google Sheets agregando un timestamp único a la URL
     var tstamp = new Date().getTime();
     var urlConAntiCache = URL_CSV + "&t=" + tstamp;
 
-    // Consultamos los datos en vivo sin usar sessionStorage
     var response = await fetch(urlConAntiCache);
     var rawData = await response.text();
 
@@ -194,19 +192,18 @@ function renderGrid(lista) {
     var badgeHtml = p.inStock ? '' : '<span class="badge-agotado">Agotado</span>';
     var outClass = p.inStock ? '' : ' out-of-stock';
     
-    // Procesamiento y renderizado del badge personalizado (Columna 10 del Excel)
+    // Inyección de badges dinámicos personalizados
     var customBadgeHtml = '';
     var badgeClass = '';
     
     if (p.inStock && p.badge) {
       var bTxt = p.badge.toLowerCase();
-      // Condicionales para emparejar colores con las clases CSS de tu archivo de estilos
       if (bTxt.indexOf('vendido') !== -1 || bTxt.indexOf('oro') !== -1) {
         badgeClass = 'badge-mas-vendido';
       } else if (bTxt.indexOf('nuevo') !== -1 || bTxt.indexOf('verde') !== -1) {
         badgeClass = 'badge-nuevo';
       } else {
-        badgeClass = 'badge-destacado'; // Por defecto lila decorativo
+        badgeClass = 'badge-destacado';
       }
       customBadgeHtml = `<span class="special-badge ${badgeClass}">${p.badge}</span>`;
     }
@@ -405,7 +402,6 @@ function showToast(msg) {
   setTimeout(function() { toast.classList.remove('show'); }, 2500);
 }
 
-// Guardar en el almacenamiento persistente local
 function saveCart() {
   try { localStorage.setItem('sgb_cart', JSON.stringify(cart)); }
   catch(e) {}

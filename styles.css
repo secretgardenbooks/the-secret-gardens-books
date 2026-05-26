@@ -338,7 +338,7 @@ main { position: relative; z-index: 1; padding: 0.8rem 0.8rem 6rem; }
 .confirm-btn-send { background: #25D366; color: white; }
 .confirm-btn-back { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid rgba(169,143,208,0.15); }
 
-/* ── NUEVO: Estilos para fijar las etiquetas del Excel (Badges) ── */
+/* ── Estilos para fijar las etiquetas del Excel (Badges) ── */
 .special-badge { 
   position: absolute; 
   top: 8px; 
@@ -363,3 +363,70 @@ main { position: relative; z-index: 1; padding: 0.8rem 0.8rem 6rem; }
 .cart-notes { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(169,143,208,0.18); border-radius: 8px; padding: 8px 10px; color: var(--text); font-size: 0.78rem; font-family: 'Jost', sans-serif; resize: none; outline: none; min-height: 60px; transition: border-color 0.2s; line-height: 1.5; }
 .cart-notes:focus { border-color: rgba(169,143,208,0.35); }
 .cart-notes::placeholder { color: var(--muted); }
+
+/* ── NUEVO: Estilos Carrusel estilo Netflix ── */
+.top-carousel-section {
+  padding: 0.5rem 0 1rem;
+  position: relative;
+  z-index: 5;
+}
+.carousel-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem;
+  color: var(--moonlight);
+  padding: 0 1.2rem;
+  margin-bottom: 8px;
+}
+.carousel-track {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 10px 1.2rem 25px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE y Edge */
+}
+.carousel-track::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+.carousel-item {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  width: 130px;
+  height: 160px;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.carousel-item:hover {
+  transform: scale(1.06);
+  z-index: 10;
+}
+.carousel-number {
+  position: absolute;
+  left: -5px;
+  bottom: -18px;
+  font-size: 7.5rem;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--navy);
+  -webkit-text-stroke: 2px var(--lavender);
+  z-index: 1;
+  letter-spacing: -6px;
+  text-shadow: 4px 4px 10px rgba(0,0,0,0.5);
+}
+.carousel-img {
+  width: 100px;
+  height: 145px;
+  object-fit: cover;
+  border-radius: 6px;
+  z-index: 2;
+  box-shadow: 2px 5px 15px rgba(0,0,0,0.6);
+  border: 1px solid rgba(169,143,208,0.2);
+}
+@media (max-width: 400px) {
+  .carousel-item { width: 115px; height: 140px; }
+  .carousel-number { font-size: 6.5rem; bottom: -15px; }
+  .carousel-img { width: 85px; height: 125px; }
+}

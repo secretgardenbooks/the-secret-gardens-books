@@ -177,6 +177,8 @@ main { position: relative; z-index: 1; padding: 0.8rem 0.8rem 6rem; }
 .card:active { transform: scale(0.98); }
 .card:hover { border-color: rgba(169,143,208,0.3); }
 
+.card-wrap { position: relative; width: 100%; }
+
 .card-img { 
   width: 100%; 
   aspect-ratio: 3/4; 
@@ -222,7 +224,6 @@ main { position: relative; z-index: 1; padding: 0.8rem 0.8rem 6rem; }
 .cover-dura { background: rgba(212,184,150,0.12); border-color: rgba(212,184,150,0.35); color: var(--gold); }
 
 .badge-agotado { position: absolute; top: 8px; left: 8px; background: rgba(180,60,60,0.85); color: white; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 999px; backdrop-filter: blur(4px); z-index: 5; }
-.card-wrap { position: relative; }
 .card.out-of-stock .btn-buy,
 .card.out-of-stock .btn-cart { opacity: 0.35; pointer-events: none; cursor: not-allowed; }
 .card.out-of-stock .card-img { filter: grayscale(40%); }
@@ -336,3 +337,29 @@ main { position: relative; z-index: 1; padding: 0.8rem 0.8rem 6rem; }
 .confirm-btn:active { opacity: 0.75; }
 .confirm-btn-send { background: #25D366; color: white; }
 .confirm-btn-back { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid rgba(169,143,208,0.15); }
+
+/* ── NUEVO: Estilos para fijar las etiquetas del Excel (Badges) ── */
+.special-badge { 
+  position: absolute; 
+  top: 8px; 
+  right: 8px; 
+  z-index: 10; 
+  font-size: 0.52rem; 
+  font-weight: 800; 
+  text-transform: uppercase; 
+  letter-spacing: 0.08em; 
+  padding: 3px 8px; 
+  border-radius: 999px; 
+  backdrop-filter: blur(6px); 
+  border: 1px solid; 
+}
+.badge-mas-vendido { background: rgba(232,184,0,0.22); border-color: #e8b800; color: #f5d020; }
+.badge-nuevo       { background: rgba(29,185,84,0.2);  border-color: #1db954; color: #1db954; }
+.badge-destacado   { background: rgba(123,94,167,0.25); border-color: var(--lavender); color: var(--lavender); }
+
+/* Notas y campos del carrito */
+.cart-notes-wrap { margin: 8px 0 10px; }
+.cart-notes-label { font-size: 0.68rem; color: var(--muted); margin-bottom: 5px; display: block; }
+.cart-notes { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(169,143,208,0.18); border-radius: 8px; padding: 8px 10px; color: var(--text); font-size: 0.78rem; font-family: 'Jost', sans-serif; resize: none; outline: none; min-height: 60px; transition: border-color 0.2s; line-height: 1.5; }
+.cart-notes:focus { border-color: rgba(169,143,208,0.35); }
+.cart-notes::placeholder { color: var(--muted); }

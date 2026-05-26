@@ -56,10 +56,9 @@
   @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
   /* ── Cards ── */
-  .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(169,143,208,0.12); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: border-color 0.3s, transform 0.2s; }
+  .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(169,143,208,0.12); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: border-color 0.3s, transform 0.2s; position: relative; }
   .card:active { transform: scale(0.98); }
   .card:hover { border-color: rgba(169,143,208,0.3); }
-  /* lazy load: imagen oculta hasta cargar */
   .card-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: rgba(123,94,167,0.08); border-bottom: 1px solid rgba(169,143,208,0.1); opacity: 0; transition: opacity 0.4s ease; }
   .card-img.loaded { opacity: 1; }
   .card-body { padding: 0.8rem; flex: 1; display: flex; flex-direction: column; }
@@ -73,56 +72,29 @@
   .btn-buy { background: #25D366; }
   .btn-cart { background: var(--purple); }
 
-  /* ── Badge sin stock ── */
+  /* ── Botón más géneros ── */
   .tags-more-btn {
-  font-size: 0.46rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  background: rgba(169,143,208,0.1);
-  border: 1px solid rgba(169,143,208,0.2);
-  color: var(--muted);
-  border-radius: 999px;
-  padding: 1px 6px;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  white-space: nowrap;
-}
-.tags-more-btn:hover {
-  background: rgba(169,143,208,0.2);
-  color: var(--lavender);
-}
-.tags-overflow {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  vertical-align: middle;
-}
+    font-size: 0.46rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: rgba(169,143,208,0.1);
+    border: 1px solid rgba(169,143,208,0.2);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 1px 6px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  .tags-more-btn:hover { background: rgba(169,143,208,0.2); color: var(--lavender); }
+  .tags-overflow { display: inline-flex; flex-wrap: wrap; gap: 2px; vertical-align: middle; }
 
-.cover-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 0.48rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-radius: 999px;
-  padding: 2px 6px;
-  margin-bottom: 4px;
-  font-weight: 600;
-  border: 1px solid;
-}
-.cover-blanda {
-  background: rgba(169,143,208,0.12);
-  border-color: rgba(169,143,208,0.3);
-  color: var(--lavender);
-}
-.cover-dura {
-  background: rgba(212,184,150,0.12);
-  border-color: rgba(212,184,150,0.35);
-  color: var(--gold);
-}
+  /* ── Badges de tapa ── */
+  .cover-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 0.48rem; text-transform: uppercase; letter-spacing: 0.05em; border-radius: 999px; padding: 2px 6px; margin-bottom: 4px; font-weight: 600; border: 1px solid; }
+  .cover-blanda { background: rgba(169,143,208,0.12); border-color: rgba(169,143,208,0.3); color: var(--lavender); }
+  .cover-dura { background: rgba(212,184,150,0.12); border-color: rgba(212,184,150,0.35); color: var(--gold); }
 
-.badge-agotado { position: absolute; top: 8px; left: 8px; background: rgba(180,60,60,0.85); color: white; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 999px; backdrop-filter: blur(4px); }
+  .badge-agotado { position: absolute; top: 8px; left: 8px; background: rgba(180,60,60,0.85); color: white; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 999px; backdrop-filter: blur(4px); z-index: 5; }
   .card-wrap { position: relative; }
   .card.out-of-stock .btn-buy,
   .card.out-of-stock .btn-cart { opacity: 0.35; pointer-events: none; cursor: not-allowed; }
@@ -141,7 +113,6 @@
   .modal-btn:active { opacity: 0.7; }
   .modal-btn-buy { background: #25D366; }
   .modal-btn-cart { background: var(--purple); }
-  /* Compartir libro */
   .modal-share { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 8px; background: none; border: 1px solid rgba(169,143,208,0.2); border-radius: 8px; padding: 7px; width: 100%; color: var(--muted); font-size: 0.72rem; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
   .modal-share:hover { color: var(--lavender); border-color: rgba(169,143,208,0.4); }
 
@@ -161,7 +132,7 @@
   .sidebar.open { right: 0; }
   .cart-list { flex: 1; overflow-y: auto; margin: 12px 0; padding-right: 5px; }
 
-  /* ── Ítem carrito con +/- ── */
+  /* ── Ítem carrito ── */
   .cart-item { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.07); padding-bottom: 12px; }
   .cart-item-info { flex: 1; min-width: 0; }
   .cart-item-title { font-size: 0.85rem; color: var(--moonlight); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -174,7 +145,7 @@
   .cart-item-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 2px 4px; transition: color 0.2s; flex-shrink: 0; }
   .cart-item-remove:hover { color: #ff6b6b; }
 
-  /* ── Barra de progreso pedido ── */
+  /* ── Barra de progreso ── */
   .cart-progress { margin: 10px 0 6px; }
   .cart-progress-label { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); margin-bottom: 5px; }
   .cart-progress-bar { height: 4px; background: rgba(255,255,255,0.07); border-radius: 999px; overflow: hidden; }
@@ -189,69 +160,50 @@
 
   .no-results { text-align: center; color: var(--muted); font-style: italic; padding: 40px; grid-column: span 3; }
 
-  /* ── BADGES ESPECIALES ── */
-  .special-badge { position:absolute; top:7px; right:7px; z-index:4; font-size:0.5rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; padding:3px 8px; border-radius:999px; backdrop-filter:blur(6px); border:1px solid; }
-  .badge-mas-vendido { background:rgba(232,184,0,0.22); border-color:#e8b800; color:#f5d020; }
-  .badge-nuevo       { background:rgba(29,185,84,0.2);  border-color:#1db954; color:#1db954; }
-  .badge-destacado   { background:rgba(123,94,167,0.25);border-color:var(--lavender); color:var(--lavender); }
-  .card.has-badge-gold  { border-color:rgba(247,220,80,0.35); box-shadow:0 0 18px rgba(247,220,80,0.1); }
-  .card.has-badge-green { border-color:rgba(29,185,84,0.35);  box-shadow:0 0 18px rgba(29,185,84,0.1); }
-  .card.has-badge-purp  { border-color:rgba(169,143,208,0.45); box-shadow:0 0 18px rgba(169,143,208,0.12); }
-
   /* ── FAVORITOS ── */
-  .fav-btn { position:absolute; top:7px; left:7px; z-index:4; background:rgba(10,14,31,0.6); backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,0.1); border-radius:50%; width:26px; height:26px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:0.8rem; transition:transform 0.2s; line-height:1; }
-  .fav-btn:active { transform:scale(1.35); }
-  .fav-btn.active { border-color:rgba(255,100,130,0.5); }
-  .favs-section { position:relative; z-index:1; padding:0.6rem 0.8rem 0.2rem; display:none; }
-  .favs-section.visible { display:block; }
-  .favs-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
-  .favs-title { font-family:'Cormorant Garamond',serif; font-size:0.9rem; color:var(--moonlight); }
-  .favs-clear { font-size:0.62rem; color:var(--muted); cursor:pointer; background:none; border:none; text-decoration:underline; }
-  .favs-grid { display:flex; gap:7px; overflow-x:auto; padding-bottom:5px; scrollbar-width:none; }
-  .favs-grid::-webkit-scrollbar { display:none; }
-  .fav-card { flex-shrink:0; width:68px; cursor:pointer; background:rgba(255,255,255,0.03); border:1px solid rgba(169,143,208,0.15); border-radius:8px; overflow:hidden; transition:border-color 0.2s; }
-  .fav-card:hover { border-color:rgba(169,143,208,0.35); }
-  .fav-card img { width:100%; aspect-ratio:3/4; object-fit:cover; display:block; }
-  .fav-card-title { font-size:0.5rem; color:var(--muted); padding:3px 4px; line-height:1.2; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .favs-section { position: relative; z-index: 1; padding: 0.6rem 0.8rem 0.2rem; display: none; }
+  .favs-section.visible { display: block; }
+  .favs-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
+  .favs-title { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; color: var(--moonlight); }
+  .favs-clear { font-size: 0.62rem; color: var(--muted); cursor: pointer; background: none; border: none; text-decoration: underline; }
+  .favs-grid { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+  .favs-grid::-webkit-scrollbar { display: none; }
+  .fav-card { flex-shrink: 0; width: 68px; cursor: pointer; background: rgba(255,255,255,0.03); border: 1px solid rgba(169,143,208,0.15); border-radius: 8px; overflow: hidden; transition: border-color 0.2s; }
+  .fav-card:hover { border-color: rgba(169,143,208,0.35); }
+  .fav-card img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; }
+  .fav-card-title { font-size: 0.5rem; color: var(--muted); padding: 3px 4px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
   /* ── SUGERENCIAS EN MODAL ── */
-  .modal-suggestions { margin-top:12px; border-top:1px solid rgba(169,143,208,0.12); padding-top:10px; }
-  .modal-suggestions-title { font-family:'Cormorant Garamond',serif; font-size:0.78rem; color:var(--muted); font-style:italic; margin-bottom:7px; }
-  .suggestions-row { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; }
-  .suggestions-row::-webkit-scrollbar { display:none; }
-  .suggestion-card { flex-shrink:0; width:62px; cursor:pointer; background:rgba(255,255,255,0.03); border:1px solid rgba(169,143,208,0.12); border-radius:7px; overflow:hidden; transition:border-color 0.2s, transform 0.15s; }
-  .suggestion-card:hover { border-color:rgba(169,143,208,0.3); transform:scale(1.05); }
-  .suggestion-card img { width:100%; aspect-ratio:3/4; object-fit:cover; display:block; }
-  .suggestion-card-title { font-size:0.48rem; color:var(--muted); padding:3px 4px; line-height:1.2; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-
-  /* ── NOTAS AL PEDIDO ── */
-  .cart-notes-wrap { margin:8px 0 10px; }
-  .cart-notes-label { font-size:0.68rem; color:var(--muted); margin-bottom:5px; display:block; }
-  .cart-notes { width:100%; background:rgba(255,255,255,0.04); border:1px solid rgba(169,143,208,0.18); border-radius:8px; padding:8px 10px; color:var(--text); font-size:0.78rem; font-family:'Jost',sans-serif; resize:none; outline:none; min-height:60px; transition:border-color 0.2s; line-height:1.5; }
-  .cart-notes:focus { border-color:rgba(169,143,208,0.35); }
-  .cart-notes::placeholder { color:var(--muted); }
+  .modal-suggestions { margin-top: 12px; border-top: 1px solid rgba(169,143,208,0.12); padding-top: 10px; }
+  .modal-suggestions-title { font-family: 'Cormorant Garamond', serif; font-size: 0.78rem; color: var(--muted); font-style: italic; margin-bottom: 7px; }
+  .suggestions-row { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+  .suggestions-row::-webkit-scrollbar { display: none; }
+  .suggestion-card { flex-shrink: 0; width: 62px; cursor: pointer; background: rgba(255,255,255,0.03); border: 1px solid rgba(169,143,208,0.12); border-radius: 7px; overflow: hidden; transition: border-color 0.2s, transform 0.15s; }
+  .suggestion-card:hover { border-color: rgba(169,143,208,0.3); transform: scale(1.05); }
+  .suggestion-card img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; }
+  .suggestion-card-title { font-size: 0.48rem; color: var(--muted); padding: 3px 4px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
   /* ── MODAL CONFIRMACIÓN ── */
-  .confirm-modal { position:fixed; inset:0; background:rgba(5,8,20,0.88); backdrop-filter:blur(18px); z-index:3000; display:none; align-items:center; justify-content:center; padding:20px; }
-  .confirm-modal.open { display:flex; }
-  .confirm-content { background:var(--deep); border:1px solid rgba(169,143,208,0.22); border-radius:18px; width:100%; max-width:340px; max-height:88vh; overflow-y:auto; padding:18px; animation:pop 0.28s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 24px 60px rgba(0,0,0,0.5); }
-  .confirm-title { font-family:'Cormorant Garamond',serif; font-size:1.22rem; color:var(--moonlight); margin-bottom:12px; text-align:center; }
-  .confirm-items { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
-  .confirm-item { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(169,143,208,0.1); border-radius:10px; padding:8px; }
-  .confirm-item-img { width:44px; height:58px; object-fit:cover; border-radius:5px; flex-shrink:0; border:1px solid rgba(169,143,208,0.15); }
-  .confirm-item-info { flex:1; min-width:0; }
-  .confirm-item-title { font-size:0.8rem; color:var(--moonlight); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .confirm-item-meta { font-size:0.68rem; color:var(--muted); margin-top:2px; }
-  .confirm-item-price { font-weight:700; color:var(--gold); font-size:0.88rem; white-space:nowrap; }
-  .confirm-notes-box { background:rgba(169,143,208,0.06); border:1px solid rgba(169,143,208,0.14); border-radius:8px; padding:8px 10px; font-size:0.75rem; color:var(--muted); margin-bottom:12px; font-style:italic; display:none; }
-  .confirm-total { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-top:1px solid rgba(169,143,208,0.12); padding-top:10px; }
-  .confirm-total-label { font-size:0.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.1em; }
-  .confirm-total-amount { font-weight:700; color:var(--gold); font-size:1.3rem; }
-  .confirm-btns { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-  .confirm-btn { border:none; padding:12px; border-radius:10px; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.04em; cursor:pointer; font-weight:700; transition:opacity 0.2s; }
-  .confirm-btn:active { opacity:0.75; }
-  .confirm-btn-send { background:#25D366; color:white; }
-  .confirm-btn-back { background:rgba(255,255,255,0.06); color:var(--muted); border:1px solid rgba(169,143,208,0.15); }
+  .confirm-modal { position: fixed; inset: 0; background: rgba(5,8,20,0.88); backdrop-filter: blur(18px); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .confirm-modal.open { display: flex; }
+  .confirm-content { background: var(--deep); border: 1px solid rgba(169,143,208,0.22); border-radius: 18px; width: 100%; max-width: 340px; max-height: 88vh; overflow-y: auto; padding: 18px; animation: pop 0.28s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
+  .confirm-title { font-family: 'Cormorant Garamond', serif; font-size: 1.22rem; color: var(--moonlight); margin-bottom: 12px; text-align: center; }
+  .confirm-items { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .confirm-item { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(169,143,208,0.1); border-radius: 10px; padding: 8px; }
+  .confirm-item-img { width: 44px; height: 58px; object-fit: cover; border-radius: 5px; flex-shrink: 0; border: 1px solid rgba(169,143,208,0.15); }
+  .confirm-item-info { flex: 1; min-width: 0; }
+  .confirm-item-title { font-size: 0.8rem; color: var(--moonlight); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .confirm-item-meta { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+  .confirm-item-price { font-weight: 700; color: var(--gold); font-size: 0.88rem; white-space: nowrap; }
+  .confirm-notes-box { background: rgba(169,143,208,0.06); border: 1px solid rgba(169,143,208,0.14); border-radius: 8px; padding: 8px 10px; font-size: 0.75rem; color: var(--muted); margin-bottom: 12px; font-style: italic; display: none; }
+  .confirm-total { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-top: 1px solid rgba(169,143,208,0.12); padding-top: 10px; }
+  .confirm-total-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .confirm-total-amount { font-weight: 700; color: var(--gold); font-size: 1.3rem; }
+  .confirm-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .confirm-btn { border: none; padding: 12px; border-radius: 10px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer; font-weight: 700; transition: opacity 0.2s; }
+  .confirm-btn:active { opacity: 0.75; }
+  .confirm-btn-send { background: #25D366; color: white; }
+  .confirm-btn-back { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid rgba(169,143,208,0.15); }
 </style>
 </head>
 <body>
@@ -263,7 +215,6 @@
     <img src="https://drive.google.com/thumbnail?id=11AFSWDWBU8cKap0G_AVcGjF5ITofF025&sz=w200" class="logo-img" alt="The Secret Gardens Logo" onerror="this.style.display='none'">
     <div class="logo-text">
       <h1>The Secret Gardens</h1>
-      
     </div>
   </div>
   <p class="welcome-text">Donde incluso los libros raros echan raíz. 📚</p>
@@ -303,19 +254,17 @@
 </div>
 
 <main>
-  <!-- Skeleton loader: se muestra mientras carga -->
   <div class="grid" id="skeletonGrid"></div>
   <div class="grid" id="productGrid" style="display:none;"></div>
 </main>
 
-<!-- Modal detalle libro -->
 <div id="modal" class="modal" onclick="closeModal()">
   <div class="modal-content" onclick="event.stopPropagation()">
     <span class="modal-close" onclick="closeModal()">×</span>
     <img id="modalImg" src="" class="modal-img" onerror="this.src='https://placehold.co/300x400/111c3a/a98fd0?text=The+Secret+Gardens'">
     <h2 id="modalTitle" style="font-family:'Cormorant Garamond',serif; color:var(--moonlight); font-size:1.25rem; margin-bottom:4px;"></h2>
     <span id="modalCover" class="cover-badge" style="display:none; margin-bottom:6px; position:relative; z-index:1;"></span>
-  <p id="modalAuthor" style="color:var(--lavender); font-style:italic; font-size:0.82rem; margin-bottom:7px;"></p>
+    <p id="modalAuthor" style="color:var(--lavender); font-style:italic; font-size:0.82rem; margin-bottom:7px;"></p>
     <div id="modalGenres" class="modal-genres"></div>
     <p id="modalDesc" style="font-size:0.82rem; line-height:1.6; color:var(--text); max-height:80px; overflow-y:auto;"></p>
     <div id="modalPrice" style="color:var(--gold); font-weight:bold; font-size:1.2rem; margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:8px;"></div>
@@ -333,7 +282,6 @@
 
 <div id="toast" class="toast"></div>
 
-<!-- Modal carrito vacío -->
 <div id="emptyCartModal" class="modal" onclick="closeEmptyCart()">
   <div class="modal-content" style="text-align:center; padding:30px 20px;" onclick="event.stopPropagation()">
     <div style="font-size:3rem; margin-bottom:10px;">🌙</div>
@@ -343,13 +291,11 @@
   </div>
 </div>
 
-<!-- Sidebar carrito -->
 <div id="sidebar" class="sidebar">
   <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(169,143,208,0.2); padding-bottom:12px;">
     <h2 style="font-family:'Cormorant Garamond',serif; color:var(--moonlight); font-size:1.6rem;">Tu Pedido</h2>
     <span onclick="toggleCart()" style="cursor:pointer; font-size:2rem; color:var(--muted); line-height:1;">×</span>
   </div>
-  <!-- Barra de progreso -->
   <div class="cart-progress" id="cartProgress" style="display:none;">
     <div class="cart-progress-label">
       <span id="progressText"></span>
@@ -365,13 +311,11 @@
   <button class="checkout-btn" onclick="sendOrder()">Finalizar Pedido 🌙</button>
 </div>
 
-<!-- FAB flotante carrito -->
 <button class="cart-fab" onclick="toggleCart()" aria-label="Abrir carrito">
   🛒
   <span id="cartBadge">0</span>
 </button>
 
-<!-- MODAL CONFIRMACIÓN -->
 <div class="confirm-modal" id="confirmModal">
   <div class="confirm-content">
     <div class="confirm-title">🌙 Confirmar pedido</div>
@@ -391,7 +335,7 @@
 <script>
 var URL_CSV = "https://docs.google.com/spreadsheets/d/1LyKI6OiOagXXQDel0a5NKojaggCccEEMQF43L2fgTuw/export?format=csv&gid=0";
 var WHATSAPP = "584125713381";
-var CART_GOAL = 5; // libros para llenar la barra de progreso
+var CART_GOAL = 5;
 var products = [];
 var cart = (function() {
   try { return JSON.parse(localStorage.getItem('sgb_cart')) || []; }
@@ -470,28 +414,23 @@ async function loadData() {
         products = rows.map(function(cols, index) {
           var rawPrice = cols[4] ? String(cols[4]).replace(/[^0-9.-]+/g, '') : '0';
           var rawImg = cols[6] ? cols[6].trim() : '';
-          // Stop-words que no sirven como etiqueta
           var STOP = ['de','del','la','el','los','las','y','e','a','en','con','por','para','un','una','o','u','al'];
           var genres = (function() {
             if (!cols[3]) return ['General'];
             var seen = {};
             var tags = [];
-            // Primero separar por coma
             cols[3].split(',').forEach(function(phrase) {
-              // Luego cada frase separarla por espacio
               phrase.trim().split(/\s+/).forEach(function(word) {
                 var w = word.trim().replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]/g, '');
                 if (!w || w.length < 3) return;
                 var wl = w.toLowerCase();
                 if (STOP.indexOf(wl) !== -1) return;
-                // Capitalizar primera letra
                 var tag = w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
                 if (!seen[tag]) { seen[tag] = true; tags.push(tag); }
               });
             });
             return tags.length ? tags : ['General'];
           })();
-          // col[7] = disponibilidad (opcional): si dice "agotado" o "no", se marca sin stock
           var rawStock = cols[7] ? cols[7].trim().toLowerCase() : '';
           var inStock = rawStock !== 'agotado' && rawStock !== 'no' && rawStock !== '0';
           return {
@@ -555,7 +494,6 @@ function applyFilters() {
   if (sort === 'title-asc')  filtered.sort(function(a,b){ return a.title.localeCompare(b.title); });
   if (sort === 'title-desc') filtered.sort(function(a,b){ return b.title.localeCompare(a.title); });
 
-  // Contador de resultados
   var count = document.getElementById('resultsCount');
   if (term || genre || sort) {
     count.innerText = filtered.length + ' de ' + products.length + ' libros';
@@ -566,7 +504,7 @@ function applyFilters() {
   renderGrid(filtered);
 }
 
-/* ── Render con lazy loading e imagen fade-in ── */
+/* ── Render con lazy loading ── */
 function renderGrid(lista) {
   var grid = document.getElementById('productGrid');
   if (lista.length === 0) {
@@ -574,49 +512,43 @@ function renderGrid(lista) {
     return;
   }
   grid.innerHTML = lista.map(function(p) {
-    var tagsHtml = p.genres.map(function(g) {
-      return '<span class="genre-tag">' + g + '</span>';
-    }).join('');
     var badgeHtml = p.inStock ? '' : '<span class="badge-agotado">Agotado</span>';
     var outClass = p.inStock ? '' : ' out-of-stock';
-    return '<div class="card' + outClass + cardBorderClass + '" onclick="openModal(' + p.id + ')">' +
-      '<div class="card-wrap">' +
-        badgeHtml +
-        favHtml +
-        badgeHtml +
-        '<img data-src="' + p.img + '" class="card-img" ' +
-          'onerror="this.src=\'https://placehold.co/300x400/111c3a/a98fd0?text=The+Secret+Gardens\'; this.classList.add(\'loaded\')">' +
-      '</div>' +
-      '<div class="card-body">' +
-        '<div class="card-title">' + p.title + '</div>' +
-        (p.cover ? '<span class="cover-badge ' + (p.cover.toLowerCase().indexOf('dura') !== -1 ? 'cover-dura' : 'cover-blanda') + '">' + (p.cover.toLowerCase().indexOf('dura') !== -1 ? '📗' : '📄') + ' ' + p.cover + '</span>' : '') +
-        (function() {
-          var MAX_VISIBLE = 3;
-          var visibleTags = p.genres.slice(0, MAX_VISIBLE).map(function(g) {
-            return '<span class="genre-tag">' + g + '</span>';
-          }).join('');
-          var hiddenTags = p.genres.slice(MAX_VISIBLE);
-          var hiddenHtml = hiddenTags.length
-            ? '<span class="tags-overflow" id="extra-' + p.id + '" style="display:none; flex-wrap:wrap; gap:2px;">'  +
-              hiddenTags.map(function(g){ return '<span class="genre-tag" style="margin-right:2px;">' + g + '</span>'; }).join('') +
-              '</span>' +
-              '<button class="tags-more-btn" onclick="event.stopPropagation();toggleTags(' + p.id + ',this)">+' + hiddenTags.length + ' más</button>'
-            : '';
-          return '<div class="card-genres">' + visibleTags + hiddenHtml + '</div>';
-        })() +
-        (p.price ? '<div class="card-price">$' + p.price.toFixed(2) + '</div>' : '<div class="card-price" style="font-size:0.72rem;color:var(--muted);font-weight:400;">Consultar precio</div>') +
-        '<div class="btn-group">' +
-          '<button class="btn btn-buy" onclick="event.stopPropagation();buyNow(' + p.id + ')">Comprar</button>' +
-          '<button class="btn btn-cart" onclick="event.stopPropagation();addToCart(' + p.id + ')">+ Añadir</button>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
+    
+    var MAX_VISIBLE = 3;
+    var visibleTags = p.genres.slice(0, MAX_VISIBLE).map(function(g) {
+      return '<span class="genre-tag">' + g + '</span>';
+    }).join('');
+    var hiddenTags = p.genres.slice(MAX_VISIBLE);
+    var hiddenHtml = hiddenTags.length
+      ? '<span class="tags-overflow" id="extra-' + p.id + '" style="display:none; flex-wrap:wrap; gap:2px;">'  +
+        hiddenTags.map(function(g){ return '<span class="genre-tag" style="margin-right:2px;">' + g + '</span>'; }).join('') +
+        '</span>' +
+        '<button class="tags-more-btn" onclick="event.stopPropagation();toggleTags(' + p.id + ',this)">+' + hiddenTags.length + ' más</button>'
+      : '';
+
+    return `
+      <div class="card${outClass}" onclick="openModal(${p.id})">
+        <div class="card-wrap">
+          ${badgeHtml}
+          <img data-src="${p.img}" class="card-img" onerror="this.src='https://placehold.co/300x400/111c3a/a98fd0?text=The+Secret+Gardens'; this.classList.add('loaded')">
+        </div>
+        <div class="card-body">
+          <div class="card-title">${p.title}</div>
+          ${p.cover ? `<span class="cover-badge ${p.cover.toLowerCase().indexOf('dura') !== -1 ? 'cover-dura' : 'cover-blanda'}">${p.cover.toLowerCase().indexOf('dura') !== -1 ? '📗' : '📄'} ${p.cover}</span>` : ''}
+          <div class="card-genres">${visibleTags}${hiddenHtml}</div>
+          ${p.price ? `<div class="card-price">$${p.price.toFixed(2)}</div>` : '<div class="card-price" style="font-size:0.72rem;color:var(--muted);font-weight:400;">Consultar precio</div>'}
+          <div class="btn-group">
+            <button class="btn btn-buy" onclick="event.stopPropagation();buyNow(${p.id})">Comprar</button>
+            <button class="btn btn-cart" onclick="event.stopPropagation();addToCart(${p.id})">+ Añadir</button>
+          </div>
+        </div>
+      </div>
+    `;
   }).join('');
 
-  // Lazy loading con IntersectionObserver
   lazyLoadImages();
 
-  // Mostrar contador inicial
   if (!document.getElementById('resultsCount').innerText) {
     document.getElementById('resultsCount').innerText = products.length + ' libros en el catálogo';
   }
@@ -637,7 +569,6 @@ function lazyLoadImages() {
     }, { rootMargin: '100px' });
     imgs.forEach(function(img) { obs.observe(img); });
   } else {
-    // fallback sin observer
     imgs.forEach(function(img) {
       img.src = img.dataset.src;
       img.onload = function() { img.classList.add('loaded'); };
@@ -675,19 +606,21 @@ function openModal(id) {
     mpEl.style.fontSize = '0.85rem';
     mpEl.style.fontWeight = '400';
   }
-  // Sugerencias — libros del mismo género
-  var sugg = products.filter(function(x) {
+  
+  var summ = products.filter(function(x) {
     if (x.id === p.id) return false;
     return x.genres.some(function(g) { return p.genres.indexOf(g) !== -1; });
   }).slice(0, 5);
   var suggRow = document.getElementById('suggestionsRow');
   var suggSec = document.getElementById('modalSuggestions');
-  if (sugg.length) {
-    suggRow.innerHTML = sugg.map(function(s) {
-      return '<div class="suggestion-card" onclick="openModal(' + s.id + ')">' +
-        '<img src="' + s.img + '" onerror="this.src='https://placehold.co/62x82/111c3a/a98fd0?text=SGB'">' +
-        '<div class="suggestion-card-title">' + s.title + '</div>' +
-      '</div>';
+  if (summ.length) {
+    suggRow.innerHTML = summ.map(function(s) {
+      return `
+        <div class="suggestion-card" onclick="openModal(${s.id})">
+          <img src="${s.img}" onerror="this.src='https://placehold.co/62x82/111c3a/a98fd0?text=SGB'">
+          <div class="suggestion-card-title">${s.title}</div>
+        </div>
+      `;
     }).join('');
     suggSec.style.display = 'block';
   } else {
@@ -773,7 +706,6 @@ function saveCart() {
 
 function updateUI() {
   saveCart();
-  // Badge con animación bump
   var totalItems = cart.reduce(function(acc, item) { return acc + item.qty; }, 0);
   var badge = document.getElementById('cartBadge');
   badge.innerText = totalItems;
@@ -797,7 +729,6 @@ function updateUI() {
   }
   if (notesWrap) notesWrap.style.display = 'block';
 
-  // Barra de progreso
   progressEl.style.display = 'block';
   totalRowEl.style.display = 'flex';
   var pct = Math.min(100, Math.round((totalItems / CART_GOAL) * 100));
@@ -805,7 +736,6 @@ function updateUI() {
   document.getElementById('progressText').innerText = totalItems >= CART_GOAL ? '¡Pedido completo! 🎉' : 'Progreso del pedido';
   document.getElementById('progressItems').innerText = totalItems + ' / ' + CART_GOAL + ' libros';
 
-  // Lista con +/−
   var totalMoney = 0;
   cartList.innerHTML = cart.map(function(item, i) {
     totalMoney += item.price * item.qty;
@@ -842,21 +772,22 @@ function sendOrder() {
     document.body.style.overflow = 'hidden';
     return;
   }
-  // Mostrar modal de confirmación con miniaturas
   var total = cart.reduce(function(acc, p) { return acc + ((p.price||0) * p.qty); }, 0);
   document.getElementById('confirmTotal').innerText = total > 0 ? '$' + total.toFixed(2) : 'A consultar';
   document.getElementById('confirmItems').innerHTML = cart.map(function(p) {
     var priceStr = p.price ? '$' + (p.price * p.qty).toFixed(2) : 'Consultar';
-    return '<div class="confirm-item">' +
-      '<img class="confirm-item-img" src="' + p.img + '" onerror="this.src='https://placehold.co/44x58/111c3a/a98fd0?text=SGB'">' +
-      '<div class="confirm-item-info">' +
-        '<div class="confirm-item-title">' + p.title + '</div>' +
-        '<div class="confirm-item-meta">' + p.author + ' · x' + p.qty + '</div>' +
-      '</div>' +
-      '<div class="confirm-item-price">' + priceStr + '</div>' +
-    '</div>';
+    return `
+      <div class="confirm-item">
+        <img class="confirm-item-img" src="${p.img}" onerror="this.src='https://placehold.co/44x58/111c3a/a98fd0?text=SGB'">
+        <div class="confirm-item-info">
+          <div class="confirm-item-title">${p.title}</div>
+          <div class="confirm-item-meta">${p.author} · x${p.qty}</div>
+        </div>
+        <div class="confirm-item-price">${priceStr}</div>
+      </div>
+    `;
   }).join('');
-  // Mostrar nota si hay
+  
   var notes = document.getElementById('cartNotes') ? document.getElementById('cartNotes').value.trim() : '';
   var notesBox = document.getElementById('confirmNotesBox');
   if (notes && notesBox) {
@@ -917,10 +848,12 @@ function renderFavs() {
   grid.innerHTML = favs.map(function(id) {
     var p = products.find(function(x){ return x.id === id; });
     if (!p) return '';
-    return '<div class="fav-card" onclick="openModal(' + p.id + ')" title="' + p.title + '">' +
-      '<img src="' + p.img + '" onerror="this.src='https://placehold.co/68x90/111c3a/a98fd0?text=SGB'">' +
-      '<div class="fav-card-title">' + p.title + '</div>' +
-    '</div>';
+    return `
+      <div class="fav-card" onclick="openModal(${p.id})" title="${p.title}">
+        <img src="${p.img}" onerror="this.src='https://placehold.co/68x90/111c3a/a98fd0?text=SGB'">
+        <div class="fav-card-title">${p.title}</div>
+      </div>
+    `;
   }).join('');
 }
 
@@ -945,7 +878,6 @@ function toggleTags(id, btn) {
 
 document.getElementById('searchInput').addEventListener('input', applyFilters);
 
-/* ── Abrir libro directo desde URL ── */
 function checkUrlParam() {
   var params = new URLSearchParams(window.location.search);
   var libroId = params.get('libro');

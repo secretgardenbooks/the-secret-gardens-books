@@ -104,13 +104,12 @@ async function loadData() {
           var carouselMatch = rawCarousel.match(/\d+/);
           var carouselRank = carouselMatch ? parseInt(carouselMatch[0], 10) : null;
 
-          // NUEVO: Lógica Matemática para Columna L (Descuento - Precio Inflado)
+          // Lógica Matemática para Columna L (Descuento - Precio Inflado)
           var rawDiscount = cols[11] ? cols[11].trim() : '';
           var discountMatch = rawDiscount.match(/\d+/);
           var discountPercent = discountMatch ? parseInt(discountMatch[0], 10) : 0;
           var originalPrice = null;
           
-          // Si escribes un número del 1 al 99 en la columna L, calculará el precio inflado
           if (discountPercent > 0 && discountPercent < 100 && parsedPrice > 0) {
             originalPrice = parsedPrice / (1 - (discountPercent / 100));
           }
@@ -690,6 +689,33 @@ function checkUrlParam() {
     if (p) {
       setTimeout(function() { openModal(id); }, 300);
     }
+  }
+}
+
+/* ── Redes Sociales Animación ── */
+var socialIcons = [
+  "https://drive.google.com/thumbnail?id=1G03S0JGGLE2eUJH9EVz1J42RLEWtqGXg&sz=w100",
+  "https://drive.google.com/thumbnail?id=1j-jfrTrvqAC5eBerXzqEdxceq6DsIc9L&sz=w100"
+];
+var currentIconIndex = 0;
+
+setInterval(function() {
+  var iconEl = document.getElementById('bubbleIcon');
+  if(!iconEl) return;
+  iconEl.style.opacity = 0;
+  setTimeout(function() {
+    currentIconIndex = (currentIconIndex + 1) % socialIcons.length;
+    iconEl.src = socialIcons[currentIconIndex];
+    iconEl.style.opacity = 1;
+  }, 300); 
+}, 4000);
+
+function toggleSocialMenu() {
+  var menu = document.getElementById('socialMenu');
+  if(menu) {
+    var isHidden = (menu.style.display === 'none' || menu.style.display === '');
+    menu.style.display = isHidden ? 'flex' : 'none';
+    document.body.style.overflow = isHidden ? 'hidden' : 'auto';
   }
 }
 

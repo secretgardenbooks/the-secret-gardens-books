@@ -131,6 +131,20 @@
     <span id="cartBadge">0</span>
   </button>
 
+  <div class="social-bubble" id="socialBubble" onclick="toggleSocialMenu()" aria-label="Redes Sociales">
+    <img id="bubbleIcon" src="https://drive.google.com/thumbnail?id=1G03S0JGGLE2eUJH9EVz1J42RLEWtqGXg&sz=w100" alt="Social">
+  </div>
+
+  <div id="socialMenu" class="social-menu" onclick="toggleSocialMenu()">
+    <div class="social-menu-content" onclick="event.stopPropagation()">
+      <h3 style="color:var(--moonlight); margin-bottom:15px; font-family:'Cormorant Garamond',serif; font-size: 1.5rem;">Comunidad</h3>
+      <a href="https://www.instagram.com/secretgardens_books?igsh=NXRkd29wd2RzZ2Iz" target="_blank" class="social-link">📸 Secret Gardens Books 📚</a>
+      <a href="https://www.instagram.com/bb_books_11?igsh=MXZhYWMxYjZ1ZnNidg==" target="_blank" class="social-link">📸 Bibi_📚</a>
+      <a href="https://www.tiktok.com/@bb_books_?_r=1&_t=ZS-96hEfP5db55" target="_blank" class="social-link">🎵 BbBooks✨📚</a>
+      <button class="modal-btn modal-btn-cart" style="margin-top:15px; width:100%" onclick="toggleSocialMenu()">Cerrar</button>
+    </div>
+  </div>
+
   <div class="confirm-modal" id="confirmModal">
     <div class="confirm-content">
       <div class="confirm-title">🌙 Confirmar pedido</div>

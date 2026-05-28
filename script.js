@@ -61,6 +61,38 @@ function getStableImageUrl(rawImg) {
   return rawImg;
 }
 
+/* ── Mapeo interno de Subcategorías a Categorías Principales (Filtro Superior) ── */
+function mapToMainCategory(phrase) {
+  var lower = phrase.toLowerCase().trim();
+  
+  if (lower.indexOf('romance') !== -1 || lower.indexOf('romantica') !== -1 || lower.indexOf('romántica') !== -1) {
+    return 'Romance';
+  }
+  if (lower.indexOf('fantasia') !== -1 || lower.indexOf('fantasía') !== -1) {
+    return 'Fantasía';
+  }
+  if (lower.indexOf('mitologia') !== -1 || lower.indexOf('mitología') !== -1) {
+    return 'Mitología';
+  }
+  if (lower.indexOf('erotica') !== -1 || lower.indexOf('erótica') !== -1) {
+    return 'Erótica';
+  }
+  if (lower.indexOf('thriller') !== -1 || lower.indexOf('suspenso') !== -1 || lower.indexOf('misterio') !== -1) {
+    return 'Thriller / Misterio';
+  }
+  if (lower.indexOf('juvenil') !== -1) {
+    return 'Juvenil';
+  }
+  if (lower.indexOf('ficcion') !== -1 || lower.indexOf('ficción') !== -1) {
+    return 'Ficción';
+  }
+  
+  // Si no encaja en ninguna regla superior, capitaliza la frase completa y la devuelve como categoría única
+  return phrase.split(/\s+/).map(function(w) {
+    return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+  }).join(' ');
+}
+
 /* ── Carga de datos optimizada en tiempo real (Sin caché local) ── */
 async function loadData() {
   try {
@@ -79,23 +111,40 @@ async function loadData() {
           var rawPrice = cols[4] ? String(cols[4]).replace(/[^0-9.-]+/g, '') : '0';
           var parsedPrice = parseFloat(rawPrice) || 0;
           var rawImg = cols[6] ? cols[6].trim() : '';
-          var STOP = ['de','del','la','el','los','las','y','e','a','en','con','por','para','un','una','o','u','al'];
-          var genres = (function() {
-            if (!cols[3]) return ['General'];
-            var seen = {};
-            var tags = [];
-            cols[3].split(',').forEach(function(phrase) {
-              phrase.trim().split(/\s+/).forEach(function(word) {
-                var w = word.trim().replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]/g, '');
-                if (!w || w.length < 3) return;
-                var wl = w.toLowerCase();
-                if (STOP.indexOf(wl) !== -1) return;
-                var tag = w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-                if (!seen[tag]) { seen[tag] = true; tags.push(tag); }
-              });
+          
+          // NUEVA LÓGICA DE CATEGORIZACIÓN AVANZADA
+          var originalPhrasesTags = []; // Guardará las frases bonitas completas (ej: "Novela Romántica")
+          var mappedMainCategories = []; // Guardará los grupos padres para el filtro (ej: "Romance")
+          
+          if (cols[3] && cols[3].trim() !== "") {
+            // Dividimos EXCLUSIVAMENTE por comas para respetar nombres compuestos
+            cols[3].split(',').forEach(function(rawPhrase) {
+              var trimmed = rawPhrase.trim();
+              if (!trimmed) return;
+              
+              // Formatear frase: Capitalizar la primera letra de cada palabra de la frase compuesta
+              var formattedTag = trimmed.split(/\s+/).map(function(word) {
+                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+              }).join(' ');
+              
+              if (originalPhrasesTags.indexOf(formattedTag) === -1) {
+                originalPhrasesTags.push(formattedTag);
+              }
+              
+              // Mapear de forma inteligente a su categoría principal (padre)
+              var mainCat = mapToMainCategory(trimmed);
+              if (mappedMainCategories.indexOf(mainCat) === -1) {
+                mappedMainCategories.push(mainCat);
+              }
             });
-            return tags.length ? tags : ['General'];
-          })();
+          }
+          
+          // Fallback por si la celda está vacía
+          if (originalPhrasesTags.length === 0) {
+            originalPhrasesTags = ['General'];
+            mappedMainCategories = ['General'];
+          }
+
           var rawStock = cols[7] ? cols[7].trim().toLowerCase() : '';
           var inStock = rawStock !== 'agotado' && rawStock !== 'no' && rawStock !== '0';
           
@@ -118,7 +167,8 @@ async function loadData() {
             id: index,
             title: cols[1] || 'Sin título',
             author: cols[2] || 'Anónimo',
-            genres: genres,
+            genres: originalPhrasesTags,        // Etiquetas exactas visuales
+            mainCategories: mappedMainCategories, // Categorías simplificadas de filtro
             price: parsedPrice,
             desc: cols[5] || 'Este libro guarda secretos que solo descubrirás al leerlo...',
             img: getStableImageUrl(rawImg),
@@ -150,20 +200,31 @@ async function loadData() {
   }
 }
 
+/* ── Rellenar el filtro superior únicamente con Categorías Principales Limpias ── */
 function populateGenres() {
   var seen = {};
-  var unique = [];
+  var uniqueMainCats = [];
+  
   products.forEach(function(p) {
-    p.genres.forEach(function(g) {
-      if (!seen[g]) { seen[g] = true; unique.push(g); }
+    p.mainCategories.forEach(function(cat) {
+      if (!seen[cat]) { 
+        seen[cat] = true; 
+        uniqueMainCats.push(cat); 
+      }
     });
   });
-  unique.sort();
+  
+  uniqueMainCats.sort();
   var select = document.getElementById('genreFilter');
   if(!select) return;
-  unique.forEach(function(g) {
+  
+  // Reiniciar el select manteniendo la opción base vacía
+  select.innerHTML = '<option value="">Todos los géneros</option>';
+  
+  uniqueMainCats.forEach(function(cat) {
     var opt = document.createElement('option');
-    opt.value = g; opt.textContent = g;
+    opt.value = cat; 
+    opt.textContent = cat;
     select.appendChild(opt);
   });
 }
@@ -193,19 +254,27 @@ function renderCarousel() {
   }).join('');
 }
 
-/* ── Filtros + orden + contador ── */
+/* ── Filtros + orden + contador Corregido ── */
 function applyFilters() {
   var searchInput = document.getElementById('searchInput');
   var genreFilter = document.getElementById('genreFilter');
   var sortSelect = document.getElementById('sortSelect');
   
   var term = searchInput ? searchInput.value.toLowerCase() : '';
-  var genre = genreFilter ? genreFilter.value : '';
+  var selectedGenrePadre = genreFilter ? genreFilter.value : '';
   var sort = sortSelect ? sortSelect.value : '';
 
   var filtered = products.filter(function(p) {
-    var matchText = !term || p.title.toLowerCase().indexOf(term) !== -1 || p.author.toLowerCase().indexOf(term) !== -1;
-    var matchGenre = !genre || p.genres.indexOf(genre) !== -1;
+    // El buscador de texto inspecciona título, autor y también las etiquetas completas
+    var tagsString = p.genres.join(' ').toLowerCase();
+    var matchText = !term || 
+                    p.title.toLowerCase().indexOf(term) !== -1 || 
+                    p.author.toLowerCase().indexOf(term) !== -1 ||
+                    tagsString.indexOf(term) !== -1;
+                    
+    // El filtro de selección contrasta directamente con el grupo simplificado de categorías padres
+    var matchGenre = !selectedGenrePadre || p.mainCategories.indexOf(selectedGenrePadre) !== -1;
+    
     return matchText && matchGenre;
   });
 
@@ -216,7 +285,7 @@ function applyFilters() {
 
   var count = document.getElementById('resultsCount');
   if (count) {
-    if (term || genre || sort) {
+    if (term || selectedGenrePadre || sort) {
       count.innerText = filtered.length + ' de ' + products.length + ' libros';
     } else {
       count.innerText = products.length + ' libros en el catálogo';
@@ -253,7 +322,6 @@ function renderGrid(lista) {
       customBadgeHtml = `<span class="special-badge ${badgeClass}">${p.badge}</span>`;
     }
     
-    // Inyectar bloque del precio (con o sin descuento matemático)
     var priceHtml = '';
     if (p.price) {
       if (p.originalPrice) {
@@ -361,7 +429,6 @@ function openModal(id) {
   var mpEl = document.getElementById('modalPrice');
   if (p.price) {
     if (p.originalPrice) {
-      // Mostrar precio falso tachado junto al precio real y la etiqueta en el modal
       mpEl.innerHTML = `<span class="price-original" style="font-size:0.9rem;">$${p.originalPrice.toFixed(2)}</span>$${p.price.toFixed(2)} <span class="discount-tag" style="font-size:0.75rem;">-${p.discountPercent}%</span>`;
     } else {
       mpEl.innerText = '$' + p.price.toFixed(2);
@@ -376,7 +443,8 @@ function openModal(id) {
   
   var summ = products.filter(function(x) {
     if (x.id === p.id) return false;
-    return x.genres.some(function(g) { return p.genres.indexOf(g) !== -1; });
+    // Sugerencias basadas en coincidir en las categorías principales simplificadas
+    return x.mainCategories.some(function(g) { return p.mainCategories.indexOf(g) !== -1; });
   }).slice(0, 5);
   
   var suggRow = document.getElementById('suggestionsRow');
